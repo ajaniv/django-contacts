@@ -31,93 +31,138 @@ or organization of instances using the definition of an associated 'Type' class
 #    would be:
 #        'sl_contacts_contact_name'
 #
-# @TODO: how to model organization contact vs person contact
+# @TODO: how to model organization contact vs person contact; via contact type?
 # @TODO: define the rules between specifying the fomratted name and contact name
 # @TODO: how to handle multiple addresses per contact (i.e preferred)
-# @TODO: how to best model Role, Title within context of organization.
-#    Should organization have attributes of Role, Title?
-# @TODO: review approach to common types, whether separate ref data application is required
-# @TODO: model contact group; allow a contact to be associated with multiple groups
-# @TODO: add contact audio (see https://github.com/areski/django-audiofield)
-# @TODO: add missing rfc6350 fields (i.e. Contact Key)
-from django.utils.translation import gettext as _
+# @TODO: add contact Media
+# @TODO: add missing rfc6350 fields (i.e. Contact Key, audio see https://github.com/areski/django-audiofield)
+# @TODO: add manager classes
+# @TODO: For image, review approach to have bundled thumbnail/compressed version
+# @TODO: check implementation of related contact when uri is used,not contact
+# defined in model
 
-from core.models import VersionedObject, NamedObject
+
+from core.models import VersionedModel, NamedModel, PrioritizedModel
 from core.models import app_table_name, db_table_name
-from core.models_image import Image
-from core.models_demographics import Gender
-from core.models_organization import Role, Title
-from core.models_location import Country, Language, Province, State, Timezone
+from core_models.models import Image
+from core_models.models import Gender
+from core_models.models import Role, Title
+from core_models.models import Organization, OrganizationUnit
+from core_models.models import Annotation, Category
+from core_models.models import EmailType, FormattedName, Group, Name
+from core_models.models import InstantMessagingType, LogoType
+from core_models.models import NicknameType, PhoneType
+from core_models.models import PhotoType, UrlType
+from core_models.models import Address, AddressType, Language, LanguageType
+from core_models.models import GeographicLocation, GeographicLocationType
+from core_models.models import Timezone, TimezoneType
 from core import fields
 
 _app_label = 'contacts'
 
 
-class GeographicLocation(VersionedObject):
-    """Geographic location model class.
-
-    Captures geographic location data.
-    """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("GeographicLocation"))
-    latitude = fields.latitude_field()
-    longitude = fields.longitude_field()
-
-
-class Name(VersionedObject):
-    """Contact name model class.
-
-    Defines the contact name components.
-    A contact may be associated with at most one Name instance:
-        Contact(1) --------> Name(0..1)
-    """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("Name"))
-
-    family_name = fields.char_field(max_length=1024)
-    given_name = fields.char_field(max_length=1024)
-    additional_name = fields.char_field(max_length=1024)
-    honorific_prefix = fields.char_field(max_length=1024)
-    honorific_suffix = fields.char_field(max_length=1024)
-
-    @property
-    def full_name(self):
-        return '%s %s' % (self.given_name, self.family_name)
-
-
-class ContactType(NamedObject):
+class ContactType(NamedModel):
     """Contact type model class.
 
     Allows the organization of contacts into categories.
     """
-    class Meta(NamedObject.Meta):
+    class Meta(NamedModel.Meta):
         app_label = _app_label
         db_table = app_table_name(_app_label, db_table_name("ContactType"))
 
 
-class Contact(VersionedObject):
+class BaseModel(VersionedModel, PrioritizedModel):
+    class Meta(VersionedModel.Meta):
+        app_label = _app_label
+        abstract = True
+
+
+class Contact(BaseModel):
     """Contact model class.
 
     Capture contact attributes.  Designed to allow having multiple contact
     instances per person, organization, etc.
     """
 
-    class Meta(VersionedObject.Meta):
-        abstract = True
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("Contact"))
-    contact_type = fields.foreign_key_field(ContactType)
 
-    contact_name = fields.one_to_one_field(Name, blank=True, null=True)
+    contact_type = fields.foreign_key_field(ContactType)
     gender = fields.foreign_key_field(Gender, blank=True, null=True)
+
+    address = fields.many_to_many_field(
+        Address, through="ContactAddress", blank=True, null=True)
+    annotations = fields.many_to_many_field(
+        Annotation, through="ContactAnnotation", blank=True, null=True)
+    categories = fields.many_to_many_field(
+        Category, through="ContactCategory", blank=True, null=True)
+    emails = fields.many_to_many_field(
+        EmailType, through="ContactEmail",
+        blank=True, null=True)
+    formatted_names = fields.many_to_many_field(
+        FormattedName, through="ContactFormattedName",
+        blank=True, null=True)
+    groups = fields.many_to_many_field(
+        Group, through="ContactGroup",
+        blank=True, null=True)
+    instant_messaging = fields.many_to_many_field(
+        InstantMessagingType, through="ContactInstanceMessaging",
+        blank=True, null=True)
+    languages = fields.many_to_many_field(
+        Language, through="ContactLanguage",
+        blank=True, null=True)
+    locations = fields.many_to_many_field(
+        GeographicLocation, through="ContactGeographicLocation",
+        blank=True, null=True)
+    logos = fields.many_to_many_field(
+        Image, through="ContactLogo",
+        blank=True, null=True)
+    names = fields.many_to_many_field(
+        Name, through="ContactName",
+        blank=True, null=True)
+    nicknames = fields.many_to_many_field(
+        NicknameType, through="ContactNickname",
+        blank=True, null=True)
+    organizations = fields.many_to_many_field(
+        Organization, through="ContactOrganization",
+        blank=True, null=True)
+    phones = fields.many_to_many_field(
+        PhoneType, through="ContactPhone",
+        blank=True, null=True)
+    photos = fields.many_to_many_field(
+        Image, through="ContactPhoto",
+        blank=True, null=True)
+    related_contacts = fields.many_to_many_field(
+        "self", through="RelatedContacts", symmetrical=False,
+        blank=True, null=True)
+    roles = fields.many_to_many_field(
+        Role, through="ContactRole", blank=True, null=True)
+    timezones = fields.many_to_many_field(
+        Timezone, through="ContactTimezone", blank=True, null=True)
+    urls = fields.many_to_many_field(
+        UrlType, through="ContactUrl", blank=True, null=True)
 
     birth_date = fields.date_field(blank=True, null=True)
     anniversary = fields.date_field(blank=True, null=True)
 
 
-class FormattedName(VersionedObject):
+class ContactName(BaseModel):
+    """Contact name model class.
+
+    Defines the contact name components.
+    While the RFC specifies that a contact may be associated with at most one
+    Name instance, this implementation supports many such instances:
+        Contact(1) --------> Name(0..*)
+    """
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label, db_table_name("Name"))
+        unique_together = ('contact', 'name')
+
+    contact = fields.foreign_key_field(Contact)
+    name = fields.foreign_key_field(Name)
+
+
+class FormattedName(BaseModel):
     """Contact formatted name model class.
 
     Specifies the formatted contact name.
@@ -126,290 +171,176 @@ class FormattedName(VersionedObject):
     """
     # @TODO: handle multiple formatted names (i.e. concept of preferred)
 
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("FormattedName"))
+        unique_together = ('contact', 'name')
 
     contact = fields.foreign_key_field(Contact)
-    name = fields.char_field(max_length=1024)
+    name = fields.foreign_key_field(FormattedName)
 
     def __str__(self):
         return self.name
 
 
-class NicknameType(NamedObject):
-    """Contact nickname type model class.
-
-    Allow contact nickname classification.
-    Sample values may include 'work, 'home', 'unknown'.
-    """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("NicknameType"))
-
-
-class Nickname(VersionedObject):
+class ContactNickname(BaseModel):
     """Contact nickname model class.
 
     Allow a association of contact with a nickname.
     A Contact may be associated with 0 or more Nickname instances:
         Contact(1) ------> Nickname(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("Nickname"))
+        unique_together = ('contact', 'nickname_type', 'name')
+
     contact = fields.foreign_key_field(Contact)
     nickname_type = fields.foreign_key_field(NicknameType)
-    name = fields.char_field(max_length=1024)
+    name = fields.char_field()
 
 
-class PhotoType(NamedObject):
-    """Contact photo type model class.
-
-    Allow contact photo classification.
-    Sample values may include 'unknown'.
-    """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("PhotoType"))
-
-
-class ContactImage(VersionedObject):
+class ContactImage(BaseModel):
     """Contact image abstract model base class.
 
     Capture contact  photograph information.
-    A contact may be associated with 0 or more photos:
-        Contact(1) -------> Photo(0..*).
+    A contact may be associated with 0 or more images:
+        Contact(1) -------> Image(0..*).
+
+    An image may be associated with one or more contacts.
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    # @TODO: need to validate that image or url have been configured
+    class Meta(BaseModel.Meta):
         abstract = True
-        db_table = app_table_name(_app_label, db_table_name("ContactPhoto"))
 
     contact = fields.foreign_key_field(Contact)
-
     image = fields.foreign_key_field(Image, null=True, blank=True)
+    # url of image if one is not defined
     url = fields.url_field(null=True, blank=True)
 
 
-class Photo(ContactImage):
+class ContactPhoto(ContactImage):
     """Contact photo class.
 
     Capture contact photo information.
     A contact may be associated with 0 or more photos:
         Contact(1) -------> Photo(0..*).
     """
-    class Meta(VersionedObject.Meta):
-        db_table = app_table_name(_app_label, db_table_name("Photo"))
+    class Meta(ContactImage.Meta):
+        db_table = app_table_name(_app_label, db_table_name("ContactPhoto"))
+        unique_together = ('contact', 'image', 'url', 'photo_type')
+
     photo_type = fields.foreign_key_field(PhotoType)
 
 
-class LogoType(NamedObject):
-    """Contact logo type model class.
-
-    Allow contact logo classification.
-    Sample values may include 'unknown'.
-    """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("PhotoType"))
-
-
-class Logo(ContactImage):
+class ContactLogo(ContactImage):
     """Contact logo class.
 
     Capture contact logo information.
     A contact may be associated with 0 or more logos:
         Contact(1) -------> Logo(0..*).
     """
-    class Meta(VersionedObject.Meta):
-        db_table = app_table_name(_app_label, db_table_name("Logo"))
+    class Meta(ContactImage.Meta):
+        db_table = app_table_name(_app_label, db_table_name("ContactLogo"))
+        unique_together = ('contact', 'image', 'url', 'logo_type')
+
+    logo_type = fields.foreign_key_field(LogoType)
 
 
-class UrlType(NamedObject):
-    """Contact url type model class.
-
-    Sample values may include 'unknown'.
-    """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("UrlType"))
-
-
-class Url(VersionedObject):
+class ContactUrl(BaseModel):
     """Contact url model class.
 
     A contact may be associated with 0:* urls.  These may include
     social media urls including Linkedln, Facebook, Twitter.
     """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("Url"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label, db_table_name("ContactUrl"))
+        unique_together = ('contact', 'url_type', 'url')
 
     contact = fields.foreign_key_field(Contact)
     url_type = fields.foreign_key_field(UrlType)
     url = fields.url_field()
 
 
-class AddressType(NamedObject):
-    """Contract address type model class.
-
-    Allow the categorization of contact address.
-    Sample values may include 'unknown'.
-    """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("AddressType"))
-
-
-class Address(VersionedObject):
+class ContactAddress(BaseModel):
     """Contact address model class.
 
     Capture the attributes of contact address(s).
     A contact may be associated with 0 or more addresses as follows:
     Contact(1)  -------> ContactAddress(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("Address"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label, db_table_name("ContactAddress"))
+        unique_together = ('contact', 'address', 'address_type')
 
     contact = fields.foreign_key_field(Contact)
+    address = fields.foreign_key_field(Address)
     address_type = fields.foreign_key_field(AddressType)
 
-    # Labe:l allows to override  name specified in contact
-    label = fields.char_field(max_length=1024, null=True, blank=True)
-    post_office_box = fields.char_field(max_length=1024, null=True, blank=True)
 
-    # street_address/address line 1: e.g.75 Carol St.
-    street_address = fields.char_field(max_length=1024, null=True, blank=True)
-
-    # extended_address/address line 2: e.g., apartment or suite number
-    extended_address = fields.char_field(max_length=1024, null=True, blank=True)
-
-    # region:  (e.g., state or province)
-    state = fields.foreign_key_field(State, blank=True, null=True)
-    province = fields.foreign_key_field(Province, blank=True, null=True)
-
-    country = fields.foreign_key_field(Country, blank=False)
-    postal_code = fields.char_field(max_length=10)
-
-    # locality: (e.g., city)
-    city = fields.char_field(max_length=1024)
-
-    # time_zone: allow the capture of time zone per address
-    time_zone = fields.foreign_key_field(Timezone, blank=True, null=True)
-
-    # geographic_location: allow the capture of geo location per address
-    geographic_location = fields.foreign_key_field(GeographicLocation, blank=True, null=True)
-
-    def __str__(self):
-        return "%s, %s %s" % (self.city, self.state_province,
-                              str(self.country))
-
-
-class PhoneType(NamedObject):
-    """Phone type model class.
-
-    Allow phone type specification.  Values may include "text",
-    "fax", "cell", "unknown" """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("PhoneType"))
-
-
-class Phone(VersionedObject):
+class ContactPhone(BaseModel):
     """Contact phone model class.
 
     Capture contact telephone(s) attributes.
     A contact may be associated with 0 or more  telephones:
         Contact(1) ------> Phone(0:*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("Phone"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label, db_table_name("ContactPhone"))
+        unique_together = ('contact', 'phone_type', 'phone_number')
     contact = fields.foreign_key_field(Contact)
     phone_type = fields.foreign_key_field(PhoneType)
     phone_number = fields.phone_number_field()
 
 
-class EmailType(NamedObject):
-    """Email type model class."""
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("EmailType"))
-
-
-class Email(VersionedObject):
+class ContactEmail(BaseModel):
     """Contact email address model class.
 
     Captures contact email address(s).  Contact may be associated with
     0 or more email addresses:
         Contact (1) ------> Email(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("Email"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label, db_table_name("ContactEmail"))
+        unique_together = ('contact', 'email_type', 'email')
     contact = fields.foreign_key_field(Contact)
     email_type = fields.foreign_key_field(EmailType)
     email = fields.email_field()
 
 
-class InstantMessagingType(NamedObject):
-    """Instant messaging  type model class.
-
-    Allows the definition of instant messaging type.
-
-    Sample instant messaging type values include "unknown"
-    """
-    # @TODO: what are some of the possible instance messaging types?
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label,
-                                  db_table_name("InstantMessagingType"))
-
-
-class InstantMessaging(VersionedObject):
+class ContactInstantMessaging(BaseModel):
     """Contact instant messaging model class.
 
     Capture the URI(s) for contact instant messaging.
     A contact may be associated with  0 or more instance messaging uri's:
         Contact(1) -------> InstantMessaging(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("InstantMessaging"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label,
+                                  db_table_name("ContactInstantMessaging"))
+        unique_together = ('contact',
+                           'instance_messaging_type', 'instance_messaging')
     contact = fields.foreign_key_field(Contact)
     instance_messaging_type = fields.foreign_key_field(InstantMessagingType)
     instance_messaging = fields.instance_messaging_field()
 
 
-class ContactLanguageType(NamedObject):
-    """Contact language type model class.
-
-    Values may include "unknown".
-    """
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label,
-                                  db_table_name("ContactLanguageType"))
-
-
-class ContactLanguage(VersionedObject):
+class ContactLanguage(BaseModel):
     """Contact language model class.
 
     Specify the language(s) that may be used for communicating with
     a contact.  A contact may be associated 0 or more languages:
         Contact(1) -------> ContactLanguage(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("ContactLanguage"))
+        unique_together = ('contact',
+                           'language', 'language_type')
     contact = fields.foreign_key_field(Contact)
-    language_type = fields.foreign_key_field(ContactLanguageType)
     language = fields.foreign_key_field(Language)
+    language_type = fields.foreign_key_field(
+        LanguageType, blank=True, null=True)
 
 
-class ContactTimezone(VersionedObject):
+class ContactTimezone(BaseModel):
     """
     Contact time zone model class.
 
@@ -417,14 +348,17 @@ class ContactTimezone(VersionedObject):
     associated with 0 or more time zone:
         Contact ------> Timezone(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("ContactTimezone"))
+        unique_together = ('contact',
+                           'time_zone', 'time_zone_type')
     contact = fields.foreign_key_field(Contact)
     time_zone = fields.foreign_key_field(Timezone)
+    time_zone_type = fields.foreign_key_field(
+        TimezoneType, blank=True, null=True)
 
 
-class ContactGeographicLocation(VersionedObject):
+class ContactGeographicLocation(BaseModel):
     """
     Contact geographic location model class.
 
@@ -432,91 +366,75 @@ class ContactGeographicLocation(VersionedObject):
     associated with 0 or more geographic locations:
         Contact ------> GeographicLocation(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("ContactGeographicLocation"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label,
+                                  db_table_name("ContactGeographicLocation"))
+        unique_together = ('contact',
+                           'geographic_location',
+                           'geographic_location_type')
     contact = fields.foreign_key_field(Contact)
     geographic_location = fields.foreign_key_field(GeographicLocation)
+    geographic_location_type = fields.foreign_key_field(
+        GeographicLocationType, blank=True, null=True)
 
 
-class ContactTitle(VersionedObject):
+class ContactTitle(BaseModel):
     """
     Contact title model class.
 
     Within the context of an organization, capture contact title attributes.
     A contact may be associated with multiple titles:
         Contact(1) -----> Title(0:*)
+
+    The organization for which the title is in effect is optional.
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("ContactTitle"))
+        unique_together = ('contact', 'title', 'organization')
 
     contact = fields.foreign_key_field(Contact)
     title = fields.foreign_key_field(Title)
+    organization = fields.foreign_key_field(Organization,
+                                            blank=True, null=True)
 
 
-class ContacRole(VersionedObject):
+class ContactRole(BaseModel):
     """
     Contract role model class.
 
     Within the context of an organization, capture contact role attributes.
     A contact may be associated with multiple roles:
         Contact(1) -----> Role(0:*)
+
+    The organization for which the role is in effect is optional.
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("ContacRole"))
+        unique_together = ('contact', 'role', 'organization')
 
     contact = fields.foreign_key_field(Contact)
     role = fields.foreign_key_field(Role)
+    organization = fields.foreign_key_field(Organization,
+                                            blank=True, null=True)
 
 
-class OrganizationType(NamedObject):
-    """Contact organization type model class.
-
-    Allows classification of contact organization.
-    Sample values may include "unknown"
-    """
-    # @TODO: what are some of the possible instance messaging types?
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label,
-                                  db_table_name("InstantMessagingType"))
-
-
-class Organization(VersionedObject):
+class ContactOrganization(BaseModel):
     """Contact organization model class.
-
-    Capture organization attributes.  A contact may be associated
+    A contact may be associated
     with 0 or more organizations:
         Contact(1) ------> Organization(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("Organization"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label,
+                                  db_table_name("ContactOrganization"))
+        unique_together = ('contact', 'organization')
 
     contact = fields.foreign_key_field(Contact)
-    name = fields.char_field(max_length=1024)
-    unit = fields.char_field(max_length=1024, blank=True)
-    organization_type = fields.foreign_key_field(OrganizationType)
+    organization = fields.foreign_key_field(Organization)
+    unit = fields.foreign_key_field(OrganizationUnit, blank=True, null=True)
 
 
-class Member(VersionedObject):
-    """Contact member model class.
-
-    Capture membership attributes.  A contact may be associated
-    with 0 or more member instances:
-        Contact(1) ------> Member(0..*)
-    """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("Member"))
-
-    contact = fields.foreign_key_field(Contact)
-    uri = fields.uri_field()
-
-
-class RelatedContactType(NamedObject):
+class RelatedContactType(NamedModel):
     """Related contact type model class.
 
     Allows classification of contact relationships.
@@ -524,66 +442,73 @@ class RelatedContactType(NamedObject):
     "acquaintance", "parent", "child", "co-worker",  "friend"
     """
     # @TODO: what are some of the possible instance messaging types?
-    class Meta(NamedObject.Meta):
+    class Meta(NamedModel.Meta):
         app_label = _app_label
         db_table = app_table_name(_app_label,
                                   db_table_name("RelatedContactType"))
 
 
-class RelatedContact(VersionedObject):
+class RelatedContact(BaseModel):
     """Related contact model class.
 
     Capture related contact attributes.  A contact may be associated
     with 0 or more contact instances:
         Contact(1) ------> Contact(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("RelatedContact"))
+        unique_together = ('from_contact', 'to_contact', 'uri',
+                           'related_contact_type')
 
-    contact = fields.foreign_key_field(Contact)
+    from_contact = fields.foreign_key_field(Contact)
+    to_contact = fields.foreign_key_field(Contact, null=True, blank=True)
     uri = fields.uri_field(blank=True, null=True)
     related_contact_type = fields.foreign_key_field(RelatedContactType)
 
 
-class Category(NamedObject):
-    """Contact category model class.
-
-    Allows classification of contacts.
-    Sample values may include "industry", "travel", "unknown".
-    """
-    # @TODO: what are some of the possible instance messaging types?
-    class Meta(NamedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label,
-                                  db_table_name("Category"))
-
-
-class ContactCategory(VersionedObject):
+class ContactCategory(BaseModel):
     """Contact category model class.
 
     Capture contact category attributes.  A contact may be associated
     with 0 or more contact categories:
         Contact(1) ------> Category(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
+    class Meta(BaseModel.Meta):
         db_table = app_table_name(_app_label, db_table_name("ContactCategory"))
+        unique_together = ('contact', 'category')
 
     contact = fields.foreign_key_field(Contact)
     category = fields.foreign_key_field(Category)
 
 
-class ContactAnnotation(VersionedObject):
+class ContactAnnotation(BaseModel):
     """Contact annotation model class.
 
     Capture contact annotation/notes attributes.  A contact may be associated
-    with 0 or more contact annotations:
+    with 0 or more  annotations:
         Contact(1) ------> Annotation(0..*)
     """
-    class Meta(VersionedObject.Meta):
-        app_label = _app_label
-        db_table = app_table_name(_app_label, db_table_name("ContactAnnotation"))
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label,
+                                  db_table_name("ContactAnnotation"))
+        unique_together = ('contact', 'annotation')
 
     contact = fields.foreign_key_field(Contact)
-    annotation = fields.annotation_field()
+    annotation = fields.foreign_key_field(Annotation)
+
+
+class ContactGroup(BaseModel):
+    """Contact group model class.
+
+    Capture contact group attributes.  A contact may be associated
+    with 0 or more groups :
+        Contact(1) ------> Group(0..*)
+    """
+    class Meta(BaseModel.Meta):
+        db_table = app_table_name(_app_label,
+                                  db_table_name("ContactGroup"))
+        unique_together = ('contact', 'group')
+
+    contact = fields.foreign_key_field(Contact)
+    group = fields.foreign_key_field(Group)
+
