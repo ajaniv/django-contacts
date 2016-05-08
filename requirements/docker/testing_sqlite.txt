@@ -1,0 +1,2 @@
+# Docker sqlite testing requirements file
+-r testing.txt

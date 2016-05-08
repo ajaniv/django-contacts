@@ -1,0 +1,8 @@
+# common requirements file
+# @TODO: could not avoid explicitly putting a dependency on python-core-utils
+#	despite the fact that it is defined in the setup.py for django-core-utils
+-r django_rest_framework.txt
+pycountry==1.20
+git+git://github.com/ajaniv/python-core-utils@v0.1.0#egg=python-core-utils
+git+git://github.com/ajaniv/django-core-utils@v0.1.0#egg=django-core-utils
+git+git://github.com/ajaniv/django-core-models@v0.1.0#egg=django-core-models

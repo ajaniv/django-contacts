@@ -1,0 +1,2 @@
+# Docker sqlite dev requirements file
+-r ../dev.txt

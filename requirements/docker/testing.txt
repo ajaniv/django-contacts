@@ -1,0 +1,4 @@
+# Docker common testing requirements file
+-r common.txt
+-r ../testing.txt
+django-extensions==1.6.1

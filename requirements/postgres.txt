@@ -1,0 +1,2 @@
+#postgress requirements file
+psycopg2

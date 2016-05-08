@@ -70,3 +70,7 @@ target/
 
 # pyenv
 .python-version
+
+media
+logs
+databases
