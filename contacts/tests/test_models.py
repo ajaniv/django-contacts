@@ -14,13 +14,15 @@ from django_core_models.social_media.tests.factories import (
     EmailModelFactory, GroupModelFactory, FormattedNameModelFactory,
     InstantMessagingModelFactory, InstantMessagingTypeModelFactory,
     LogoTypeModelFactory, NameModelFactory,  NicknameTypeModelFactory,
-    NicknameModelFactory)
+    NicknameModelFactory, PhoneModelFactory, PhoneTypeModelFactory)
 from django_core_models.demographics.tests.factories import (
     GenderModelFactory)
 from django_core_models.locations.tests.factories import (
     AddressTypeModelFactory, GeographicLocationModelFactory, LanguageModelFactory)
 from django_core_models.images.tests.factories import (
     ImageModelFactory, ImageReferenceModelFactory)
+from django_core_models.organizations.tests.factories import (
+    OrganizationModelFactory, OrganizationUnitModelFactory)
 
 
 from . import factories
@@ -220,6 +222,33 @@ class ContactTestCase(VersionedModelTestCase):
                         "ContactNickname creation error")
         self.assertEqual(contact.nicknames.count(), 1)
         ret = models.Contact.objects.nickname_remove(contact, name)
+        self.assertEqual(ret[0], 1)
+
+    def test_contact_organization_add_remove(self):
+        contact = self.create_contact()
+        organization = OrganizationModelFactory()
+        unit = OrganizationUnitModelFactory(
+            organization=organization)
+        contact_organization = models.Contact.objects.organization_add(
+            contact, organization,
+            unit=unit)
+        self.assertTrue(contact_organization,
+                        "ContactOrganization creation error")
+        self.assertEqual(contact.organizations.count(), 1)
+        ret = models.Contact.objects.organization_remove(contact, organization)
+        self.assertEqual(ret[0], 1)
+
+    def test_contact_phone_add_remove(self):
+        contact = self.create_contact()
+        phone = PhoneModelFactory()
+        phone_type = PhoneTypeModelFactory()
+        contact_phone = models.Contact.objects.phone_add(
+            contact, phone,
+            phone_type=phone_type)
+        self.assertTrue(contact_phone,
+                        "ContactPhone creation error")
+        self.assertEqual(contact.phones.count(), 1)
+        ret = models.Contact.objects.phone_remove(contact, phone)
         self.assertEqual(ret[0], 1)
 
 
@@ -690,5 +719,37 @@ class ContactOrganizationTestCase(ContactAssociationTestCase):
         self.verify_contact_delete(self.factory_class)
 
     def test_organization_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class ContactPhoneTestCase(ContactAssociationTestCase):
+    """ContactPhone association model unit test class.
+    """
+    factory_class = factories.ContactPhoneModelFactory
+    association_name = "phones"
+    other_class = models.Phone
+    attr_name = "phone"
+
+    def test_contact_phone_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_phone_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name)
+
+    def test_contact_phone_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class)
+
+    def test_phone_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)

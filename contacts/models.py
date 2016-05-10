@@ -316,6 +316,18 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactOrganization, contact=contact, organization=organization)
 
+    def phone_add(self, contact, phone, **kwargs):
+        """Add contact and phone association."""
+        params = create_fields(contact, **kwargs)
+        instance = ContactPhone.objects.create(
+            contact=contact, phone=phone, **params)
+        return instance
+
+    def phone_remove(self, contact, phone):
+        """Remove contact and phone association."""
+        return delete_association(
+            ContactPhone, contact=contact, phone=phone)
+
 
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
@@ -703,14 +715,14 @@ class ContactPhone(ContactsModel):
         Contact(1) ------> Phone(0:*)
     """
     contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
-    phone_number = fields.foreign_key_field(Phone, on_delete=CASCADE)
+    phone = fields.foreign_key_field(Phone, on_delete=CASCADE)
     phone_type = fields.foreign_key_field(PhoneType, blank=True, null=True)
 
     class Meta(ContactsModel.Meta):
         db_table = db_table(_app_label, _contact_phone)
         verbose_name = _(_contact_phone_verbose)
         verbose_name_plural = _(pluralize(_contact_phone_verbose))
-        unique_together = ('contact', 'phone_number', 'phone_type')
+        unique_together = ("contact", "phone", "phone_type")
 
 _contact_photo = "ContactPhoto"
 _contact_photo_verbose = humanize(underscore(_contact_photo))
