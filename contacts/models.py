@@ -44,6 +44,7 @@ or organization of instances using the definition of an associated 'Type' class
 # @TODO: review class field layout
 # @TODO: review each of the types, determine which should be optional
 # @TODO: review unique together
+# @TODO: review on_delete=CASCADE for reference data types in many-2-many relationships
 from __future__ import absolute_import
 import logging
 from django.db.models import CASCADE
@@ -240,6 +241,19 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactInstantMessaging, contact=contact,
             instant_messaging=instant_messaging)
+
+    def language_add(self, contact, language, **kwargs):
+        """Add contact and language messaging association."""
+        params = create_fields(contact, **kwargs)
+        instance = ContactLanguage.objects.create(
+            contact=contact, language=language, **params)
+        return instance
+
+    def language_remove(self, contact, language):
+        """Remove contact and language association."""
+        return delete_association(
+            ContactLanguage, contact=contact,
+            language=language)
 
     def name_add(self, contact, name, **kwargs):
         """Add contact and name association."""
@@ -482,6 +496,30 @@ class ContactInstantMessaging(ContactsModel):
                            "instant_messaging",
                            "instant_messaging_type", )
 
+
+_contact_language = "ContactLanguage"
+_contact_language_verbose = humanize(underscore(_contact_language))
+
+
+class ContactLanguage(ContactsModel):
+    """Contact language model class.
+
+    Specify the language(s) that may be used for communicating with
+    a contact.  A contact may be associated 0 or more languages:
+        Contact(1) -------> ContactLanguage(0..*)
+    """
+    contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
+    language = fields.foreign_key_field(Language, on_delete=CASCADE)
+    language_type = fields.foreign_key_field(
+        LanguageType, blank=True, null=True)
+
+    class Meta(ContactsModel.Meta):
+        db_table = db_table(_app_label, _contact_language)
+        verbose_name = _(_contact_language_verbose)
+        verbose_name_plural = _(pluralize(_contact_language_verbose))
+        unique_together = ("contact", "language", "language_type")
+
+
 _contact_name = "ContactName"
 _contact_name_verbose = humanize(underscore(_contact_name))
 
@@ -629,30 +667,6 @@ class ContactUrl(ContactsModel):
 
 
 
-
-
-_contact_language = "ContactLanguage"
-_contact_language_verbose = humanize(underscore(_contact_language))
-
-
-class ContactLanguage(ContactsModel):
-    """Contact language model class.
-
-    Specify the language(s) that may be used for communicating with
-    a contact.  A contact may be associated 0 or more languages:
-        Contact(1) -------> ContactLanguage(0..*)
-    """
-    contact = fields.foreign_key_field(Contact)
-    language = fields.foreign_key_field(Language)
-    language_type = fields.foreign_key_field(
-        LanguageType, blank=True, null=True)
-
-    class Meta(ContactsModel.Meta):
-        db_table = db_table(_app_label, _contact_language)
-        verbose_name = _(_contact_language_verbose)
-        verbose_name_plural = _(pluralize(_contact_language_verbose))
-        unique_together = ('contact',
-                           'language', 'language_type')
 
 
 _contact_timezone = "ContactTimezone"

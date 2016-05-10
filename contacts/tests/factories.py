@@ -18,7 +18,7 @@ from django_core_models.social_media.tests.factories import (EmailModelFactory,
                                                              InstantMessagingModelFactory,
                                                              NicknameModelFactory)
 from django_core_models.locations.tests.factories import (
-    USAddressModelFactory)
+    LanguageModelFactory, USAddressModelFactory)
 from django_core_models.core.tests.factories import (
     AnnotationModelFactory, CategoryModelFactory)
 from .. import models
@@ -135,6 +135,17 @@ class ContactInstantMessagingModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactInstantMessaging
+
+
+class ContactLanguageModelFactory(ContactsModelFactory):
+    """ContactLanguage association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    language = factory.SubFactory(LanguageModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactLanguage
 
 
 class ContactNameModelFactory(ContactsModelFactory):
