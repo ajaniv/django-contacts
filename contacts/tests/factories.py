@@ -23,6 +23,8 @@ from django_core_models.core.tests.factories import (
     AnnotationModelFactory, CategoryModelFactory)
 from django_core_models.images.tests.factories import (
     ImageReferenceModelFactory)
+from django_core_models.organizations.tests.factories import (
+    OrganizationModelFactory)
 from .. import models
 
 
@@ -192,3 +194,14 @@ class ContactNicknameModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactNickname
+
+
+class ContactOrganizationModelFactory(ContactsModelFactory):
+    """ContactOrganization association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    organization = factory.SubFactory(OrganizationModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactOrganization

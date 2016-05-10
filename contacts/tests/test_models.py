@@ -656,3 +656,39 @@ class ContactNicknameTestCase(ContactAssociationTestCase):
 
     def test_contact_delete(self):
         self.verify_contact_delete(self.factory_class)
+
+    def test_name_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class ContactOrganizationTestCase(ContactAssociationTestCase):
+    """ContactOrganization association model unit test class.
+    """
+    factory_class = factories.ContactOrganizationModelFactory
+    association_name = "organizations"
+    other_class = models.Organization
+    attr_name = "organization"
+
+    def test_contact_organization_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_organization_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name)
+
+    def test_contact_organization_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class)
+
+    def test_organization_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)

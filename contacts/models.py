@@ -304,6 +304,18 @@ class ContactManager(VersionedModelManager):
         """Remove contact and nickname association."""
         return delete_association(ContactNickname, contact=contact, name=name)
 
+    def organization_add(self, contact, organization, **kwargs):
+        """Add contact and organization association."""
+        params = create_fields(contact, **kwargs)
+        instance = ContactOrganization.objects.create(
+            contact=contact, organization=organization, **params)
+        return instance
+
+    def organization_remove(self, contact, organization):
+        """Remove contact and organization association."""
+        return delete_association(
+            ContactOrganization, contact=contact, organization=organization)
+
 
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
@@ -656,7 +668,28 @@ class ContactNickname(ContactsModel):
         db_table = db_table(_app_label, _contact_nickname)
         verbose_name = _(_contact_nickname_verbose)
         verbose_name_plural = _(pluralize(_contact_nickname_verbose))
-        unique_together = ('contact', 'name', 'nickname_type')
+        unique_together = ("contact", "name", "nickname_type")
+
+
+_contact_organization = "ContactOrganization"
+_contact_organization_verbose = humanize(underscore(_contact_organization))
+
+
+class ContactOrganization(ContactsModel):
+    """Contact organization model class.
+    A contact may be associated
+    with 0 or more organizations:
+        Contact(1) ------> Organization(0..*)
+    """
+    contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
+    organization = fields.foreign_key_field(Organization, on_delete=CASCADE)
+    unit = fields.foreign_key_field(OrganizationUnit, blank=True, null=True)
+
+    class Meta(ContactsModel.Meta):
+        db_table = db_table(_app_label, _contact_organization)
+        verbose_name = _(_contact_organization_verbose)
+        verbose_name_plural = _(pluralize(_contact_organization_verbose))
+        unique_together = ("contact", "organization")
 
 _contact_phone = "ContactPhone"
 _contact_phone_verbose = humanize(underscore(_contact_phone))
@@ -806,25 +839,7 @@ class ContactRole(ContactsModel):
         unique_together = ('contact', 'role', 'organization')
 
 
-_contact_organization = "ContactOrganization"
-_contact_organization_verbose = humanize(underscore(_contact_organization))
 
-
-class ContactOrganization(ContactsModel):
-    """Contact organization model class.
-    A contact may be associated
-    with 0 or more organizations:
-        Contact(1) ------> Organization(0..*)
-    """
-    contact = fields.foreign_key_field(Contact)
-    organization = fields.foreign_key_field(Organization)
-    unit = fields.foreign_key_field(OrganizationUnit, blank=True, null=True)
-
-    class Meta(ContactsModel.Meta):
-        db_table = db_table(_app_label, _contact_organization)
-        verbose_name = _(_contact_organization_verbose)
-        verbose_name_plural = _(pluralize(_contact_organization_verbose))
-        unique_together = ('contact', 'organization')
 
 
 _related_contact = "RelatedContact"
