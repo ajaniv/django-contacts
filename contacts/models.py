@@ -217,6 +217,19 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactFormattedName, contact=contact, name=name)
 
+    def geographic_location_add(self, contact, geographic_location, **kwargs):
+        """Add contact and geographic location association."""
+        params = create_fields(contact, **kwargs)
+        instance = ContactGeographicLocation.objects.create(
+            contact=contact, geographic_location=geographic_location, **params)
+        return instance
+
+    def geographic_location_remove(self, contact, geographic_location):
+        """Remove contact and geographic location association."""
+        return delete_association(
+            ContactGeographicLocation, contact=contact,
+            geographic_location=geographic_location)
+
     def group_add(self, contact, group, **kwargs):
         """Add contact and group association."""
         params = create_fields(contact, **kwargs)
@@ -315,8 +328,8 @@ class Contact(ContactsModel):
     instant_messaging = fields.many_to_many_field(
         InstantMessaging, through="ContactInstantMessaging")
     languages = fields.many_to_many_field(Language, through="ContactLanguage")
-    locations = fields.many_to_many_field(GeographicLocation,
-                                          through="ContactGeographicLocation")
+    geographic_locations = fields.many_to_many_field(
+        GeographicLocation, through="ContactGeographicLocation")
     logos = fields.many_to_many_field(
         Image, through="ContactLogo",
         related_name="%(app_label)s_%(class)s_related_contact_logo")
@@ -449,6 +462,34 @@ class ContactFormattedName(ContactsModel):
         verbose_name = _(_formatted_name_verbose)
         verbose_name_plural = _(pluralize(_formatted_name_verbose))
         unique_together = ('contact', 'name')
+
+_contact_geographic_location = "ContactGeographicLocation"
+_contact_geographic_location_verbose = humanize(
+        underscore(_contact_geographic_location))
+
+
+class ContactGeographicLocation(ContactsModel):
+    """
+    Contact geographic location model class.
+
+    Capture contact geographic location(s) information.  A contact may be
+    associated with 0 or more geographic locations:
+        Contact ------> GeographicLocation(0..*)
+    """
+    contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
+    geographic_location = fields.foreign_key_field(GeographicLocation,
+                                                   on_delete=CASCADE)
+    geographic_location_type = fields.foreign_key_field(
+        GeographicLocationType, blank=True, null=True)
+
+    class Meta(ContactsModel.Meta):
+        db_table = db_table(_app_label, _contact_geographic_location)
+        verbose_name = _(_contact_geographic_location_verbose)
+        verbose_name_plural = _(
+            pluralize(_contact_geographic_location_verbose))
+        unique_together = ("contact",
+                           "geographic_location",
+                           "geographic_location_type")
 
 _contact_group = "ContactGroup"
 _contact_group_verbose = humanize(underscore(_contact_group))
@@ -694,32 +735,7 @@ class ContactTimezone(ContactsModel):
                            'time_zone', 'time_zone_type')
 
 
-_contact_geographic_location = "ContactGeographicLocation"
-_contact_geographic_location_verbose = humanize(
-        underscore(_contact_geographic_location))
 
-
-class ContactGeographicLocation(ContactsModel):
-    """
-    Contact geographic location model class.
-
-    Capture contact geographic location(s) information.  A contact may be
-    associated with 0 or more geographic locations:
-        Contact ------> GeographicLocation(0..*)
-    """
-    contact = fields.foreign_key_field(Contact)
-    geographic_location = fields.foreign_key_field(GeographicLocation)
-    geographic_location_type = fields.foreign_key_field(
-        GeographicLocationType, blank=True, null=True)
-
-    class Meta(ContactsModel.Meta):
-        db_table = db_table(_app_label, _contact_geographic_location)
-        verbose_name = _(_contact_geographic_location_verbose)
-        verbose_name_plural = _(
-            pluralize(_contact_geographic_location_verbose))
-        unique_together = ('contact',
-                           'geographic_location',
-                           'geographic_location_type')
 
 
 _contact_title = "ContactTitle"
