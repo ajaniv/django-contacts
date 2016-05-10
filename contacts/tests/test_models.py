@@ -14,7 +14,8 @@ from django_core_models.social_media.tests.factories import (
     EmailModelFactory, GroupModelFactory, FormattedNameModelFactory,
     InstantMessagingModelFactory, InstantMessagingTypeModelFactory,
     LogoTypeModelFactory, NameModelFactory,  NicknameTypeModelFactory,
-    NicknameModelFactory, PhoneModelFactory, PhoneTypeModelFactory)
+    NicknameModelFactory, PhoneModelFactory, PhoneTypeModelFactory,
+    PhotoTypeModelFactory)
 from django_core_models.demographics.tests.factories import (
     GenderModelFactory)
 from django_core_models.locations.tests.factories import (
@@ -249,6 +250,31 @@ class ContactTestCase(VersionedModelTestCase):
                         "ContactPhone creation error")
         self.assertEqual(contact.phones.count(), 1)
         ret = models.Contact.objects.phone_remove(contact, phone)
+        self.assertEqual(ret[0], 1)
+
+    def test_contact_photo_add_remove(self):
+        contact = self.create_contact()
+        image_reference = ImageReferenceModelFactory(image=ImageModelFactory())
+        # use image instance
+        contact_photo = models.Contact.objects.photo_add(
+            contact, image_reference=image_reference,
+            photo_type=PhotoTypeModelFactory())
+        self.assertTrue(contact_photo, "ContactPhoto creation error")
+        self.assertEqual(contact.photos.count(), 1)
+        ret = models.Contact.objects.photo_remove(
+            contact, image_reference=image_reference)
+        self.assertEqual(ret[0], 1)
+
+        # use image url
+        url = "http://www.example.com/image.gif"
+        image_reference = ImageReferenceModelFactory(image=None, url=url)
+        contact_photo = models.Contact.objects.photo_add(
+            contact, image_reference=image_reference,
+            photo_type=PhotoTypeModelFactory())
+        self.assertTrue(contact_photo, "ContactPhoto creation error")
+        self.assertEqual(contact.photos.count(), 1)
+        ret = models.Contact.objects.photo_remove(
+            contact, image_reference=image_reference)
         self.assertEqual(ret[0], 1)
 
 
@@ -600,7 +626,7 @@ class ContactLogoTestCase(ContactAssociationTestCase):
     """
     factory_class = factories.ContactLogoModelFactory
     association_name = "logos"
-    other_class = models.Image
+    other_class = models.ImageReference
     attr_name = "image_reference"
 
     def test_contact_logo_crud(self):
@@ -751,5 +777,37 @@ class ContactPhoneTestCase(ContactAssociationTestCase):
         self.verify_contact_delete(self.factory_class)
 
     def test_phone_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class ContactPhotoTestCase(ContactAssociationTestCase):
+    """ContactPhoto association model unit test class.
+    """
+    factory_class = factories.ContactPhotoModelFactory
+    association_name = "photos"
+    other_class = models.ImageReference
+    attr_name = "image_reference"
+
+    def test_contact_photo_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_photo_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name)
+
+    def test_contact_photo_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class)
+
+    def test_photo_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)

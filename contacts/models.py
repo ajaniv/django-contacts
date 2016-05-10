@@ -269,14 +269,14 @@ class ContactManager(VersionedModelManager):
             ContactLanguage, contact=contact,
             language=language)
 
-    def logo_add(self, contact, image_reference=None,  **kwargs):
+    def logo_add(self, contact, image_reference,  **kwargs):
         """Add contact and logo  association."""
         params = create_fields(contact, **kwargs)
         instance = ContactLogo.objects.create(
             contact=contact, image_reference=image_reference, **params)
         return instance
 
-    def logo_remove(self, contact, image_reference=None):
+    def logo_remove(self, contact, image_reference):
         """Remove contact and logo association."""
         return delete_association(
             ContactLogo, contact=contact,
@@ -328,6 +328,17 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactPhone, contact=contact, phone=phone)
 
+    def photo_add(self, contact, image_reference, **kwargs):
+        """Add contact and photo association."""
+        params = create_fields(contact, **kwargs)
+        instance = ContactPhoto.objects.create(
+            contact=contact, image_reference=image_reference, **params)
+        return instance
+
+    def photo_remove(self, contact, image_reference):
+        """Remove contact and photo association."""
+        return delete_association(
+            ContactPhoto, contact=contact, image_reference=image_reference)
 
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
@@ -743,8 +754,6 @@ class ContactPhoto(ContactImage):
         verbose_name = _(_contact_photo_verbose)
         verbose_name_plural = _(pluralize(_contact_photo_verbose))
         unique_together = ("contact", "image_reference",  "photo_type")
-
-
 
 
 _contact_url = "ContactUrl"

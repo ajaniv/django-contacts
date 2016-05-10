@@ -217,3 +217,14 @@ class ContactPhoneModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactPhone
+
+
+class ContactPhotoModelFactory(ContactsModelFactory):
+    """ContactPhoto association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    image_reference = factory.SubFactory(ImageReferenceModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactPhoto
