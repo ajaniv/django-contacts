@@ -25,7 +25,7 @@ from django_core_models.core.tests.factories import (
 from django_core_models.images.tests.factories import (
     ImageReferenceModelFactory)
 from django_core_models.organizations.tests.factories import (
-    OrganizationModelFactory)
+    OrganizationModelFactory, RoleModelFactory)
 from .. import models
 
 
@@ -243,3 +243,14 @@ class RelatedContactModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.RelatedContact
+
+
+class ContactRoleModelFactory(ContactsModelFactory):
+    """ContactRole association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    role = factory.SubFactory(RoleModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactRole

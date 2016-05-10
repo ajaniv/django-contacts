@@ -350,11 +350,21 @@ class ContactManager(VersionedModelManager):
         return create_association(RelatedContact, from_contact=from_contact,
                                   to_contact=to_contact, **params)
 
-
     def related_contact_remove(self, from_contact, to_contact):
         """Remove contact and photo association."""
         return delete_association(
             RelatedContact, from_contact=from_contact, to_contact=to_contact)
+
+    def role_add(self, contact, role, **kwargs):
+        """Add contact and role association."""
+        params = create_fields(contact, **kwargs)
+        return create_association(ContactRole, contact=contact,
+                                  role=role, **params)
+
+    def role_remove(self, contact, role):
+        """Remove contact and role association."""
+        return delete_association(
+            ContactRole, contact=contact, role=role)
 
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
@@ -771,6 +781,30 @@ class ContactPhoto(ContactImage):
         verbose_name_plural = _(pluralize(_contact_photo_verbose))
         unique_together = ("contact", "image_reference",  "photo_type")
 
+_contact_role = "ContactRole"
+_contact_role_verbose = humanize(underscore(_contact_role))
+
+
+class ContactRole(ContactsModel):
+    """
+    Contract role model class.
+
+    Within the context of an organization, capture contact role attributes.
+    A contact may be associated with multiple roles:
+        Contact(1) -----> Role(0:*)
+
+    The organization for which the role is in effect is optional.
+    """
+    contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
+    role = fields.foreign_key_field(Role, on_delete=CASCADE)
+    organization = fields.foreign_key_field(Organization,
+                                            blank=True, null=True)
+
+    class Meta(ContactsModel.Meta):
+        db_table = db_table(_app_label, _contact_role)
+        verbose_name = _(_contact_role_verbose)
+        verbose_name_plural = _(pluralize(_contact_role_verbose))
+        unique_together = ("contact", "role", "organization")
 
 _contact_url = "ContactUrl"
 _contact_url_verbose = humanize(underscore(_contact_url))
@@ -818,9 +852,6 @@ class ContactTimezone(ContactsModel):
                            'time_zone', 'time_zone_type')
 
 
-
-
-
 _contact_title = "ContactTitle"
 _contact_title_verbose = humanize(underscore(_contact_title))
 
@@ -845,32 +876,6 @@ class ContactTitle(ContactsModel):
         verbose_name = _(_contact_title_verbose)
         verbose_name_plural = _(pluralize(_contact_title_verbose))
         unique_together = ('contact', 'title', 'organization')
-
-
-_contact_role = "ContactRole"
-_contact_role_verbose = humanize(underscore(_contact_role))
-
-
-class ContactRole(ContactsModel):
-    """
-    Contract role model class.
-
-    Within the context of an organization, capture contact role attributes.
-    A contact may be associated with multiple roles:
-        Contact(1) -----> Role(0:*)
-
-    The organization for which the role is in effect is optional.
-    """
-    contact = fields.foreign_key_field(Contact)
-    role = fields.foreign_key_field(Role)
-    organization = fields.foreign_key_field(Organization,
-                                            blank=True, null=True)
-
-    class Meta(ContactsModel.Meta):
-        db_table = db_table(_app_label, _contact_role)
-        verbose_name = _(_contact_role_verbose)
-        verbose_name_plural = _(pluralize(_contact_role_verbose))
-        unique_together = ('contact', 'role', 'organization')
 
 
 _related_contact = "RelatedContact"
