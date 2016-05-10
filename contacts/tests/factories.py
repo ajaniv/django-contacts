@@ -228,3 +228,18 @@ class ContactPhotoModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactPhoto
+
+
+class RelatedContactModelFactory(ContactsModelFactory):
+    """RelatedContact association model factory class.
+    """
+    from_contact = factory.SubFactory(
+        ContactModelFactory, name=NameModelFactory())
+    to_contact = factory.SubFactory(
+        ContactModelFactory, name=NameModelFactory())
+    contract_relationship_type = factory.SubFactory(
+        ContactRelationshipTypeModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.RelatedContact

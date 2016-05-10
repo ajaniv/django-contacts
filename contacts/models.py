@@ -110,6 +110,10 @@ def delete_association(association_class, **kwargs):
     return instance.delete()
 
 
+def create_association(association_class, **kwargs):
+    """Create association instance."""
+    return association_class.objects.create(**kwargs)
+
 _contact_type = "ContactType"
 _contact_type_vebose = humanize(underscore(_contact_type))
 
@@ -339,6 +343,18 @@ class ContactManager(VersionedModelManager):
         """Remove contact and photo association."""
         return delete_association(
             ContactPhoto, contact=contact, image_reference=image_reference)
+
+    def related_contact_add(self, from_contact, to_contact, **kwargs):
+        """Add contact and photo association."""
+        params = create_fields(from_contact, **kwargs)
+        return create_association(RelatedContact, from_contact=from_contact,
+                                  to_contact=to_contact, **params)
+
+
+    def related_contact_remove(self, from_contact, to_contact):
+        """Remove contact and photo association."""
+        return delete_association(
+            RelatedContact, from_contact=from_contact, to_contact=to_contact)
 
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
@@ -777,9 +793,6 @@ class ContactUrl(ContactsModel):
         unique_together = ("contact", "url", "url_type",)
 
 
-
-
-
 _contact_timezone = "ContactTimezone"
 _contact_timezone_verbose = humanize(underscore(_contact_timezone))
 
@@ -860,9 +873,6 @@ class ContactRole(ContactsModel):
         unique_together = ('contact', 'role', 'organization')
 
 
-
-
-
 _related_contact = "RelatedContact"
 _related_contact_verbose = humanize(underscore(_related_contact))
 
@@ -875,10 +885,13 @@ class RelatedContact(ContactsModel):
         Contact(1) ------> Contact(0..*)
     """
     from_contact = fields.foreign_key_field(
-        Contact, related_name="%(app_label)s_%(class)s_related_from_contact")
+        Contact,
+        on_delete=CASCADE,
+        related_name="%(app_label)s_%(class)s_related_from_contact")
     to_contact = fields.foreign_key_field(
-        Contact, related_name="%(app_label)s_%(class)s_related_to_contact")
-    uri = fields.uri_field(blank=True, null=True)
+        Contact,
+        on_delete=CASCADE,
+        related_name="%(app_label)s_%(class)s_related_to_contact")
     contract_relationship_type = fields.foreign_key_field(
         ContactRelationshipType)
 
@@ -886,13 +899,5 @@ class RelatedContact(ContactsModel):
         db_table = db_table(_app_label, _related_contact)
         verbose_name = _(_related_contact_verbose)
         verbose_name_plural = _(pluralize(_related_contact_verbose))
-        unique_together = ('from_contact', 'to_contact', 'uri',
-                           'contract_relationship_type')
-
-
-
-
-
-
-
-
+        unique_together = ("from_contact", "to_contact",
+                           "contract_relationship_type")

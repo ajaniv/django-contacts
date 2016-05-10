@@ -277,6 +277,20 @@ class ContactTestCase(VersionedModelTestCase):
             contact, image_reference=image_reference)
         self.assertEqual(ret[0], 1)
 
+    def test_contact_related_add_remove(self):
+        from_contact = self.create_contact()
+        to_contract = self.create_contact()
+        rel_type = factories.ContactRelationshipTypeModelFactory()
+        related_contact = models.Contact.objects.related_contact_add(
+            from_contact, to_contract,
+            contract_relationship_type=rel_type)
+        self.assertTrue(related_contact,
+                        "RelatedContact creation error")
+        self.assertEqual(from_contact.related_contacts.count(), 1)
+        ret = models.Contact.objects.related_contact_remove(
+            from_contact, to_contract)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactAssociationTestCase(VersionedModelTestCase):
     """Base class for contact association test cases."""
@@ -286,37 +300,49 @@ class ContactAssociationTestCase(VersionedModelTestCase):
         return self.verify_create(factory_class, **kwargs)
 
     def verify_access(self, factory_class, association_name,
-                      attr_name,  **kwargs):
+                      attr_name,  contact_attr_name=None,
+                      **kwargs):
         """Verify association access"""
         instance = self.create_instance(factory_class, **kwargs)
-        association = getattr(instance.contact, association_name)
+        contact_attr_name = contact_attr_name or "contact"
+        contact = getattr(instance, contact_attr_name)
+        association = getattr(contact, association_name)
         self.assertEqual(association.count(), 1)
         self.assertEqual(list(association.all())[0],
                          getattr(instance, attr_name),
                          "Unexpected association instance")
 
     def verify_clear(self, factory_class, association_name,
-                     other_class, **kwargs):
+                     other_class, contact_attr_name=None,
+                     expected_contact_count=1,
+                     expected_other_model_count=1,
+                     **kwargs):
         """Verify underlying object state following clear"""
         instance = self.create_instance(factory_class, **kwargs)
-        association = getattr(instance.contact, association_name)
+        contact_attr_name = contact_attr_name or "contact"
+        contact = getattr(instance, contact_attr_name)
+        association = getattr(contact, association_name)
         association.clear()
         self.assertEqual(association.count(), 0,
                          "Unexpected association entries")
         model_class = factory_class.model_class()
         self.assertEqual(model_class.objects.count(), 0,
                          "unexpected %s  instances" % class_name(model_class))
-        self.assertEqual(models.Contact.objects.count(), 1,
+        self.assertEqual(models.Contact.objects.count(),
+                         expected_contact_count,
                          "unexpected Contact instances")
         if other_class:
             self.assertEqual(
-                other_class.objects.count(), 1,
+                other_class.objects.count(), expected_other_model_count,
                 "unexpected %s  instances" % class_name(other_class))
 
-    def verify_contact_delete(self, factory_class, **kwargs):
+    def verify_contact_delete(self, factory_class, 
+                              contact_attr_name=None,  **kwargs):
         """Verify contact delete propagation."""
         instance = self.create_instance(factory_class, **kwargs)
-        instance.contact.delete()
+        contact_attr_name = contact_attr_name or "contact"
+        contact = getattr(instance, contact_attr_name)
+        contact.delete()
         model_class = factory_class.model_class()
         self.assertEqual(
             model_class.objects.count(), 0,
@@ -809,5 +835,42 @@ class ContactPhotoTestCase(ContactAssociationTestCase):
         self.verify_contact_delete(self.factory_class)
 
     def test_photo_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class RelatedContactTestCase(ContactAssociationTestCase):
+    """RelatedContact association model unit test class.
+    """
+    factory_class = factories.RelatedContactModelFactory
+    association_name = "related_contacts"
+    other_class = models.Contact
+    attr_name = "to_contact"
+
+    def test_contact_related_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_related_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name,
+            contact_attr_name="from_contact")
+
+    def test_contact_related_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class,
+            contact_attr_name="from_contact",
+            expected_contact_count=2,
+            expected_other_model_count=2)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class,
+                                   contact_attr_name="from_contact")
+
+    def test_related_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
