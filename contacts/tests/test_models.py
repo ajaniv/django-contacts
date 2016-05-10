@@ -19,7 +19,8 @@ from django_core_models.social_media.tests.factories import (
 from django_core_models.demographics.tests.factories import (
     GenderModelFactory)
 from django_core_models.locations.tests.factories import (
-    AddressTypeModelFactory, GeographicLocationModelFactory, LanguageModelFactory)
+    AddressTypeModelFactory, GeographicLocationModelFactory, LanguageModelFactory,
+    TimezoneModelFactory, TimezoneTypeModelFactory)
 from django_core_models.images.tests.factories import (
     ImageModelFactory, ImageReferenceModelFactory)
 from django_core_models.organizations.tests.factories import (
@@ -303,6 +304,19 @@ class ContactTestCase(VersionedModelTestCase):
                         "ContactRole creation error")
         self.assertEqual(contact.roles.count(), 1)
         ret = models.Contact.objects.role_remove(contact, role)
+        self.assertEqual(ret[0], 1)
+
+    def test_contact_timezone_add_remove(self):
+        contact = self.create_contact()
+        timezone = TimezoneModelFactory()
+        timezone_type = TimezoneTypeModelFactory()
+        contact_timezone = models.Contact.objects.timezone_add(
+            contact, timezone,
+            timezone_type=timezone_type)
+        self.assertTrue(contact_timezone,
+                        "ContactTimezone creation error")
+        self.assertEqual(contact.timezones.count(), 1)
+        ret = models.Contact.objects.timezone_remove(contact, timezone)
         self.assertEqual(ret[0], 1)
 
 
@@ -918,5 +932,37 @@ class ContactRoleTestCase(ContactAssociationTestCase):
         self.verify_contact_delete(self.factory_class)
 
     def test_role_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class ContactTimezoneTestCase(ContactAssociationTestCase):
+    """ContactTimezone association model unit test class.
+    """
+    factory_class = factories.ContactTimezoneModelFactory
+    association_name = "timezones"
+    other_class = models.Timezone
+    attr_name = "timezone"
+
+    def test_contact_timezone_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_timezone_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name)
+
+    def test_contact_timezone_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class)
+
+    def test_timezone_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)

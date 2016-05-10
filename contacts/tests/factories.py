@@ -19,7 +19,8 @@ from django_core_models.social_media.tests.factories import (EmailModelFactory,
                                                              NicknameModelFactory,
                                                              PhoneModelFactory)
 from django_core_models.locations.tests.factories import (
-    GeographicLocationModelFactory, LanguageModelFactory, USAddressModelFactory)
+    GeographicLocationModelFactory, LanguageModelFactory, TimezoneModelFactory,
+    USAddressModelFactory)
 from django_core_models.core.tests.factories import (
     AnnotationModelFactory, CategoryModelFactory)
 from django_core_models.images.tests.factories import (
@@ -254,3 +255,14 @@ class ContactRoleModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactRole
+
+
+class ContactTimezoneModelFactory(ContactsModelFactory):
+    """ContactTimezone association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    timezone = factory.SubFactory(TimezoneModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactTimezone

@@ -366,6 +366,17 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactRole, contact=contact, role=role)
 
+    def timezone_add(self, contact, timezone, **kwargs):
+        """Add contact and timezone association."""
+        params = create_fields(contact, **kwargs)
+        return create_association(ContactTimezone, contact=contact,
+                                  timezone=timezone, **params)
+
+    def timezone_remove(self, contact, timezone):
+        """Remove contact and timezone association."""
+        return delete_association(
+            ContactTimezone, contact=contact, timezone=timezone)
+
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
 
@@ -422,6 +433,7 @@ class Contact(ContactsModel):
         "self", through="RelatedContact", symmetrical=False)
     roles = fields.many_to_many_field(Role, through="ContactRole")
     timezones = fields.many_to_many_field(Timezone, through="ContactTimezone")
+    titles = fields.many_to_many_field(Title, through="ContactTitle")
     urls = fields.many_to_many_field(Url, through="ContactUrl")
 
     objects = ContactManager()
@@ -806,6 +818,30 @@ class ContactRole(ContactsModel):
         verbose_name_plural = _(pluralize(_contact_role_verbose))
         unique_together = ("contact", "role", "organization")
 
+_contact_timezone = "ContactTimezone"
+_contact_timezone_verbose = humanize(underscore(_contact_timezone))
+
+
+class ContactTimezone(ContactsModel):
+    """
+    Contact time zone model class.
+
+    Capture contact time zone(s) information.  A contact may be
+    associated with 0 or more time zone:
+        Contact ------> Timezone(0..*)
+    """
+    contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
+    timezone = fields.foreign_key_field(Timezone, on_delete=CASCADE)
+    timezone_type = fields.foreign_key_field(
+        TimezoneType, blank=True, null=True)
+
+    class Meta(ContactsModel.Meta):
+        db_table = db_table(_app_label, _contact_timezone)
+        verbose_name = _(_contact_timezone_verbose)
+        verbose_name_plural = _(pluralize(_contact_timezone_verbose))
+        unique_together = (
+            "contact", "timezone", "timezone_type")
+
 _contact_url = "ContactUrl"
 _contact_url_verbose = humanize(underscore(_contact_url))
 
@@ -827,29 +863,7 @@ class ContactUrl(ContactsModel):
         unique_together = ("contact", "url", "url_type",)
 
 
-_contact_timezone = "ContactTimezone"
-_contact_timezone_verbose = humanize(underscore(_contact_timezone))
 
-
-class ContactTimezone(ContactsModel):
-    """
-    Contact time zone model class.
-
-    Capture contact time zone(s) information.  A contact may be
-    associated with 0 or more time zone:
-        Contact ------> Timezone(0..*)
-    """
-    contact = fields.foreign_key_field(Contact)
-    time_zone = fields.foreign_key_field(Timezone)
-    time_zone_type = fields.foreign_key_field(
-        TimezoneType, blank=True, null=True)
-
-    class Meta(ContactsModel.Meta):
-        db_table = db_table(_app_label, _contact_timezone)
-        verbose_name = _(_contact_timezone_verbose)
-        verbose_name_plural = _(pluralize(_contact_timezone_verbose))
-        unique_together = ('contact',
-                           'time_zone', 'time_zone_type')
 
 
 _contact_title = "ContactTitle"
