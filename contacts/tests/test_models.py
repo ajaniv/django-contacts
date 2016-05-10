@@ -13,12 +13,15 @@ from django_core_utils.tests.test_utils import (NamedModelTestCase,
 from django_core_models.social_media.tests.factories import (
     EmailModelFactory, GroupModelFactory, FormattedNameModelFactory,
     InstantMessagingModelFactory, InstantMessagingTypeModelFactory,
-    NameModelFactory,  NicknameTypeModelFactory,
+    LogoTypeModelFactory, NameModelFactory,  NicknameTypeModelFactory,
     NicknameModelFactory)
 from django_core_models.demographics.tests.factories import (
     GenderModelFactory)
 from django_core_models.locations.tests.factories import (
     AddressTypeModelFactory, GeographicLocationModelFactory, LanguageModelFactory)
+from django_core_models.images.tests.factories import (
+    ImageModelFactory, ImageReferenceModelFactory)
+
 
 from . import factories
 from .. import models
@@ -162,6 +165,31 @@ class ContactTestCase(VersionedModelTestCase):
         self.assertEqual(contact.instant_messaging.count(), 1)
         ret = manager.instant_messaging_remove(
             contact, instant_messaging)
+        self.assertEqual(ret[0], 1)
+
+    def test_contact_logo_add_remove(self):
+        contact = self.create_contact()
+        image_reference = ImageReferenceModelFactory(image=ImageModelFactory())
+        # use image instance
+        contact_logo = models.Contact.objects.logo_add(
+            contact, image_reference=image_reference,
+            logo_type=LogoTypeModelFactory())
+        self.assertTrue(contact_logo, "ContactLogo creation error")
+        self.assertEqual(contact.logos.count(), 1)
+        ret = models.Contact.objects.logo_remove(
+            contact, image_reference=image_reference)
+        self.assertEqual(ret[0], 1)
+
+        # use image url
+        url = "http://www.example.com/image.gif"
+        image_reference = ImageReferenceModelFactory(image=None, url=url)
+        contact_logo = models.Contact.objects.logo_add(
+            contact, image_reference=image_reference,
+            logo_type=LogoTypeModelFactory())
+        self.assertTrue(contact_logo, "ContactLogo creation error")
+        self.assertEqual(contact.logos.count(), 1)
+        ret = models.Contact.objects.logo_remove(
+            contact, image_reference=image_reference)
         self.assertEqual(ret[0], 1)
 
     def test_contact_language_add_remove(self):
@@ -534,6 +562,38 @@ class ContactLanguageTestCase(ContactAssociationTestCase):
         self.verify_contact_delete(self.factory_class)
 
     def test_language_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class ContactLogoTestCase(ContactAssociationTestCase):
+    """ContactLogo association model unit test class.
+    """
+    factory_class = factories.ContactLogoModelFactory
+    association_name = "logos"
+    other_class = models.Image
+    attr_name = "image_reference"
+
+    def test_contact_logo_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_logo_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name)
+
+    def test_contact_logo_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class)
+
+    def test_image_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 

@@ -11,7 +11,14 @@ from django.core.exceptions import ValidationError
 
 
 def name_validation(name, formatted_name):
-    """Validate name and formatted name.
+    """Validate Contact name and formatted name.
     """
     if name is None and formatted_name is None:
         raise ValidationError(_("Name and formatted_name are none."))
+
+
+def image_validation(image, url):
+    """Validate ContactImage association image and url.
+    """
+    if not (image or url):
+        raise ValidationError(_("Image and url are none."))

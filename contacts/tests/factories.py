@@ -21,6 +21,8 @@ from django_core_models.locations.tests.factories import (
     GeographicLocationModelFactory, LanguageModelFactory, USAddressModelFactory)
 from django_core_models.core.tests.factories import (
     AnnotationModelFactory, CategoryModelFactory)
+from django_core_models.images.tests.factories import (
+    ImageReferenceModelFactory)
 from .. import models
 
 
@@ -135,7 +137,6 @@ class ContactGroupModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactGroup
-        
 
 
 class ContactInstantMessagingModelFactory(ContactsModelFactory):
@@ -158,6 +159,17 @@ class ContactLanguageModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactLanguage
+
+
+class ContactLogoModelFactory(ContactsModelFactory):
+    """ContactLogo association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    image_reference = factory.SubFactory(ImageReferenceModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactLogo
 
 
 class ContactNameModelFactory(ContactsModelFactory):

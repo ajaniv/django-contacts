@@ -51,7 +51,7 @@ from django.db.models import CASCADE
 from django.utils.translation import ugettext_lazy as _
 from django_core_models.core.models import Annotation, Category
 from django_core_models.demographics.models import Gender
-from django_core_models.images.models import Image
+from django_core_models.images.models import Image, ImageReference
 from django_core_models.locations.models import (Address, AddressType,
                                                  GeographicLocation,
                                                  GeographicLocationType,
@@ -78,6 +78,37 @@ from . import validation
 
 logger = logging.getLogger(__name__)
 _app_label = 'contacts'
+
+
+def create_fields(instance, **kwargs):
+    """Return dict of fields to be used as create params."""
+    site = kwargs.pop("site", instance.site)
+    creation_user = kwargs.pop("creation_user", instance.creation_user)
+    effective_user = kwargs.pop("effective_user", instance.effective_user)
+    update_user = kwargs.pop("update_user", instance.update_user)
+    params = dict(
+        creation_user=creation_user, effective_user=effective_user,
+        site=site, update_user=update_user)
+    params.update(kwargs)
+    return params
+
+
+def delete_association(association_class, **kwargs):
+    """Remove an association.
+
+    Requires deletion when using 'through'.
+    """
+
+    try:
+        instance = association_class.objects.get(**kwargs)
+    except association_class.DoesNotExist:
+        logger.exception(
+            "%s instance with kwargs %s not found",
+            class_name(association_class), kwargs)
+        raise
+
+    return instance.delete()
+
 
 _contact_type = "ContactType"
 _contact_type_vebose = humanize(underscore(_contact_type))
@@ -122,36 +153,6 @@ class ContactsModel(VersionedModel, PrioritizedModel):
         """Model meta class declaration."""
         app_label = _app_label
         abstract = True
-
-
-def create_fields(instance, **kwargs):
-    """Return dict of fields to be used as create params."""
-    site = kwargs.pop("site", instance.site)
-    creation_user = kwargs.pop("creation_user", instance.creation_user)
-    effective_user = kwargs.pop("effective_user", instance.effective_user)
-    update_user = kwargs.pop("update_user", instance.update_user)
-    params = dict(
-        creation_user=creation_user, effective_user=effective_user,
-        site=site, update_user=update_user)
-    params.update(kwargs)
-    return params
-
-
-def delete_association(association_class, **kwargs):
-    """Remove an association.
-
-    Requires deletion when using 'through'.
-    """
-
-    try:
-        instance = association_class.objects.get(**kwargs)
-    except association_class.DoesNotExist:
-        logger.exception(
-            "%s instance with kwargs %s not found",
-            class_name(association_class), kwargs)
-        raise
-
-    return instance.delete()
 
 
 class ContactManager(VersionedModelManager):
@@ -256,7 +257,7 @@ class ContactManager(VersionedModelManager):
             instant_messaging=instant_messaging)
 
     def language_add(self, contact, language, **kwargs):
-        """Add contact and language messaging association."""
+        """Add contact and language association."""
         params = create_fields(contact, **kwargs)
         instance = ContactLanguage.objects.create(
             contact=contact, language=language, **params)
@@ -267,6 +268,19 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactLanguage, contact=contact,
             language=language)
+
+    def logo_add(self, contact, image_reference=None,  **kwargs):
+        """Add contact and logo  association."""
+        params = create_fields(contact, **kwargs)
+        instance = ContactLogo.objects.create(
+            contact=contact, image_reference=image_reference, **params)
+        return instance
+
+    def logo_remove(self, contact, image_reference=None):
+        """Remove contact and logo association."""
+        return delete_association(
+            ContactLogo, contact=contact,
+            image_reference=image_reference)
 
     def name_add(self, contact, name, **kwargs):
         """Add contact and name association."""
@@ -331,7 +345,7 @@ class Contact(ContactsModel):
     geographic_locations = fields.many_to_many_field(
         GeographicLocation, through="ContactGeographicLocation")
     logos = fields.many_to_many_field(
-        Image, through="ContactLogo",
+        ImageReference, through="ContactLogo",
         related_name="%(app_label)s_%(class)s_related_contact_logo")
     names = fields.many_to_many_field(Name, through="ContactName")
     nicknames = fields.many_to_many_field(Nickname,
@@ -341,7 +355,7 @@ class Contact(ContactsModel):
     phones = fields.many_to_many_field(Phone,
                                        through="ContactPhone")
     photos = fields.many_to_many_field(
-        Image, through="ContactPhoto",
+        ImageReference, through="ContactPhoto",
         related_name="%(app_label)s_%(class)s_related_contact_photo")
     related_contacts = fields.many_to_many_field(
         "self", through="RelatedContact", symmetrical=False)
@@ -357,6 +371,7 @@ class Contact(ContactsModel):
         verbose_name_plural = _(pluralize(_contact_verbose))
 
     def clean(self):
+        super(Contact, self).clean()
         validation.name_validation(self.name, self.formatted_name)
 
 _contact_address = "ContactAddress"
@@ -511,6 +526,26 @@ class ContactGroup(ContactsModel):
         verbose_name_plural = _(pluralize(_contact_group_verbose))
         unique_together = ("contact", "group")
 
+
+class ContactImage(ContactsModel):
+    """Contact image abstract model base class.
+
+    Capture contact  photograph information.
+    A contact may be associated with 0 or more images:
+        Contact(1) -------> Image(0..*).
+
+    An image may be associated with one or more contacts.
+    """
+    contact = fields.foreign_key_field(
+        Contact, on_delete=CASCADE,
+        related_name="%(app_label)s_%(class)s_related_contact")
+    image_reference = fields.foreign_key_field(ImageReference,
+                                               on_delete=CASCADE)
+
+    class Meta(ContactsModel.Meta):
+        abstract = True
+
+
 _contact_instant_messaging = "ContactInstantMessaging"
 _contact_instant_messaging_verbose = humanize(
     underscore(_contact_instant_messaging))
@@ -560,6 +595,24 @@ class ContactLanguage(ContactsModel):
         verbose_name_plural = _(pluralize(_contact_language_verbose))
         unique_together = ("contact", "language", "language_type")
 
+_contact_logo = "ContactLogo"
+_contact_logo_verbose = humanize(underscore(_contact_logo))
+
+
+class ContactLogo(ContactImage):
+    """Contact logo class.
+
+    Capture contact logo information.
+    A contact may be associated with 0 or more logos:
+        Contact(1) -------> Logo(0..*).
+    """
+    logo_type = fields.foreign_key_field(LogoType, null=True, blank=True)
+
+    class Meta(ContactImage.Meta):
+        db_table = db_table(_app_label, _contact_logo)
+        verbose_name = _(_contact_logo_verbose)
+        verbose_name_plural = _(pluralize(_contact_logo_verbose))
+        unique_together = ("contact", "image_reference", "logo_type")
 
 _contact_name = "ContactName"
 _contact_name_verbose = humanize(underscore(_contact_name))
@@ -626,26 +679,6 @@ class ContactPhone(ContactsModel):
         verbose_name_plural = _(pluralize(_contact_phone_verbose))
         unique_together = ('contact', 'phone_number', 'phone_type')
 
-
-class ContactImage(ContactsModel):
-    """Contact image abstract model base class.
-
-    Capture contact  photograph information.
-    A contact may be associated with 0 or more images:
-        Contact(1) -------> Image(0..*).
-
-    An image may be associated with one or more contacts.
-    """
-    contact = fields.foreign_key_field(
-        Contact, related_name="%(app_label)s_%(class)s_related_contact")
-    image = fields.foreign_key_field(Image)
-    # url of image if one is not defined
-    url = fields.url_field(null=True, blank=True)
-
-    # @TODO: need to validate that image or url have been configured
-    class Meta(ContactsModel.Meta):
-        abstract = True
-
 _contact_photo = "ContactPhoto"
 _contact_photo_verbose = humanize(underscore(_contact_photo))
 
@@ -664,26 +697,9 @@ class ContactPhoto(ContactImage):
         db_table = db_table(_app_label, _contact_photo)
         verbose_name = _(_contact_photo_verbose)
         verbose_name_plural = _(pluralize(_contact_photo_verbose))
-        unique_together = ("contact", "image", "url", "photo_type")
-
-_contact_logo = "ContactLogo"
-_contact_logo_verbose = humanize(underscore(_contact_logo))
+        unique_together = ("contact", "image_reference",  "photo_type")
 
 
-class ContactLogo(ContactImage):
-    """Contact logo class.
-
-    Capture contact logo information.
-    A contact may be associated with 0 or more logos:
-        Contact(1) -------> Logo(0..*).
-    """
-    logo_type = fields.foreign_key_field(LogoType, null=True, blank=True)
-
-    class Meta(ContactImage.Meta):
-        db_table = db_table(_app_label, _contact_logo)
-        verbose_name = _(_contact_logo_verbose)
-        verbose_name_plural = _(pluralize(_contact_logo_verbose))
-        unique_together = ("contact", "image", "url", "logo_type")
 
 
 _contact_url = "ContactUrl"
