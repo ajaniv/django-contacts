@@ -41,17 +41,23 @@ or organization of instances using the definition of an associated 'Type' class
 #        defined in model
 # @TODO: contact accesss requires quite a few joins, look at optimizaiton
 # @TODO: str methods
-# @TODO: review class field layout
-# @TODO: review each of the types, determine which should be optional
+
+
 # @TODO: review unique together
 # @TODO: review on_delete=CASCADE for reference data types in many-2-many relationships
 from __future__ import absolute_import
+
+# @TODO: review class field layout
+# @TODO: review each of the types, determine which should be optional
 import logging
+
 from django.db.models import CASCADE
 from django.utils.translation import ugettext_lazy as _
+from inflection import humanize, pluralize, underscore
+
 from django_core_models.core.models import Annotation, Category
 from django_core_models.demographics.models import Gender
-from django_core_models.images.models import Image, ImageReference
+from django_core_models.images.models import ImageReference
 from django_core_models.locations.models import (Address, AddressType,
                                                  GeographicLocation,
                                                  GeographicLocationType,
@@ -62,18 +68,18 @@ from django_core_models.organizations.models import (Organization,
                                                      Title)
 from django_core_models.social_media.models import (Email, EmailType,
                                                     FormattedName, Group,
-                                                    InstantMessagingType,
                                                     InstantMessaging,
-                                                    LogoType, Name,
-                                                    Nickname, NicknameType,
-                                                    Phone, PhoneType,
-                                                    PhotoType, Url, UrlType)
+                                                    InstantMessagingType,
+                                                    LogoType, Name, Nickname,
+                                                    NicknameType, Phone,
+                                                    PhoneType, PhotoType, Url,
+                                                    UrlType)
 from django_core_utils import fields
 from django_core_utils.models import (NamedModel, PrioritizedModel,
                                       VersionedModel, VersionedModelManager,
                                       db_table)
 from python_core_utils.core import class_name
-from inflection import humanize, pluralize, underscore
+
 from . import validation
 
 logger = logging.getLogger(__name__)
@@ -529,7 +535,7 @@ class ContactCategory(ContactsModel):
         unique_together = ("contact", "category")
 
     contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
-    category = fields.foreign_key_field(Category)
+    category = fields.foreign_key_field(Category, on_delete=CASCADE)
 
 _contact_email = "ContactEmail"
 _contact_email_verbose = humanize(underscore(_contact_email))
@@ -908,12 +914,6 @@ class ContactUrl(ContactsModel):
         verbose_name = _(_contact_url_verbose)
         verbose_name_plural = _(pluralize(_contact_url_verbose))
         unique_together = ("contact", "url", "url_type",)
-
-
-
-
-
-
 
 
 _related_contact = "RelatedContact"

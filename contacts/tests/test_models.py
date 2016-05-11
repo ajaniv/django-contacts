@@ -7,26 +7,28 @@
 from __future__ import absolute_import, print_function
 
 from django.utils import timezone
-from python_core_utils.core import class_name
-from django_core_utils.tests.test_utils import (NamedModelTestCase,
-                                                VersionedModelTestCase)
-from django_core_models.social_media.tests.factories import (
-    EmailModelFactory, GroupModelFactory, FormattedNameModelFactory,
-    InstantMessagingModelFactory, InstantMessagingTypeModelFactory,
-    LogoTypeModelFactory, NameModelFactory,  NicknameTypeModelFactory,
-    NicknameModelFactory, PhoneModelFactory, PhoneTypeModelFactory,
-    PhotoTypeModelFactory, UrlModelFactory, UrlTypeModelFactory)
-from django_core_models.demographics.tests.factories import (
-    GenderModelFactory)
-from django_core_models.locations.tests.factories import (
-    AddressTypeModelFactory, GeographicLocationModelFactory, LanguageModelFactory,
-    TimezoneModelFactory, TimezoneTypeModelFactory)
+
+from django_core_models.demographics.tests.factories import GenderModelFactory
 from django_core_models.images.tests.factories import (
     ImageModelFactory, ImageReferenceModelFactory)
+from django_core_models.locations.tests.factories import (
+    AddressTypeModelFactory, GeographicLocationModelFactory,
+    LanguageModelFactory, TimezoneModelFactory,
+    TimezoneTypeModelFactory)
 from django_core_models.organizations.tests.factories import (
     OrganizationModelFactory, OrganizationUnitModelFactory,
     RoleModelFactory, TitleModelFactory)
-
+from django_core_models.social_media.tests.factories import (
+    EmailModelFactory, FormattedNameModelFactory,
+    GroupModelFactory, InstantMessagingModelFactory,
+    InstantMessagingTypeModelFactory, LogoTypeModelFactory,
+    NameModelFactory, NicknameModelFactory,
+    NicknameTypeModelFactory, PhoneModelFactory,
+    PhoneTypeModelFactory, PhotoTypeModelFactory,
+    UrlModelFactory, UrlTypeModelFactory)
+from django_core_utils.tests.test_utils import (NamedModelTestCase,
+                                                VersionedModelTestCase)
+from python_core_utils.core import class_name
 
 from . import factories
 from .. import models
@@ -55,16 +57,6 @@ class ContactRelationshipTypeTestCase(NamedModelTestCase):
 class ContactTestCase(VersionedModelTestCase):
     """Contact model unit test class.
     """
-    def create_contact(self, **kwargs):
-        name = kwargs.pop("name", None)
-        formatted_name = kwargs.pop("formatted_name", None)
-        if not (name or formatted_name):
-            name = NameModelFactory()
-        instance = factories.ContactModelFactory(
-            name=name, formatted_name=formatted_name, **kwargs)
-        instance.clean()
-        return instance
-
     def test_contact_crud_name(self):
         self.verify_versioned_model_crud(
             factory_class=factories.ContactModelFactory,
@@ -84,270 +76,19 @@ class ContactTestCase(VersionedModelTestCase):
             anniversary=timezone.now())
         instance.clean()
 
-    def test_contact_address_add_remove(self):
-        contact = self.create_contact()
-        address = factories.USAddressModelFactory()
-        contact_address = models.Contact.objects.address_add(
-            contact, address, address_type=AddressTypeModelFactory())
-        self.assertTrue(contact_address, "ContactAddress creation error")
-        self.assertEqual(contact.addresses.count(), 1)
-        ret = models.Contact.objects.address_remove(contact, address)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_annotation_add_remove(self):
-        contact = self.create_contact()
-        annotation = factories.AnnotationModelFactory()
-        contact_annotation = models.Contact.objects.annotation_add(
-            contact, annotation)
-        self.assertTrue(contact_annotation, "ContactAnnotation creation error")
-        self.assertEqual(contact.annotations.count(), 1)
-        ret = models.Contact.objects.annotation_remove(contact, annotation)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_category_add_remove(self):
-        contact = self.create_contact()
-        category = factories.CategoryModelFactory()
-        contact_category = models.Contact.objects.category_add(
-            contact, category)
-        self.assertTrue(contact_category, "ContactCategory creation error")
-        self.assertEqual(contact.categories.count(), 1)
-        ret = models.Contact.objects.category_remove(contact, category)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_email_add_remove(self):
-        contact = self.create_contact()
-        email = EmailModelFactory()
-        contact_email = models.Contact.objects.email_add(
-            contact, email)
-        self.assertTrue(contact_email,
-                        "ContactEmail creation error")
-        self.assertEqual(contact.emails.count(), 1)
-        ret = models.Contact.objects.email_remove(contact, email)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_formatted_name_add_remove(self):
-        contact = self.create_contact()
-        name = FormattedNameModelFactory()
-        contact_formatted_name = models.Contact.objects.formatted_name_add(
-            contact, name)
-        self.assertTrue(contact_formatted_name,
-                        "ContactFormattedName creation error")
-        self.assertEqual(contact.formatted_names.count(), 1)
-        ret = models.Contact.objects.formatted_name_remove(contact, name)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_geographic_location_add_remove(self):
-        contact = self.create_contact()
-        geographic_location = GeographicLocationModelFactory()
-        manager = models.Contact.objects
-        contact_geographic_location = manager.geographic_location_add(
-            contact, geographic_location)
-        self.assertTrue(contact_geographic_location,
-                        "ContactGeographicLocation creation error")
-        self.assertEqual(contact.geographic_locations.count(), 1)
-        ret = manager.geographic_location_remove(contact, geographic_location)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_group_add_remove(self):
-        contact = self.create_contact()
-        group = GroupModelFactory()
-        contact_group = models.Contact.objects.group_add(contact, group)
-        self.assertTrue(contact_group,
-                        "ContactGroup creation error")
-        self.assertEqual(contact.groups.count(), 1)
-        ret = models.Contact.objects.group_remove(contact, group)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_instant_messaging_add_remove(self):
-        contact = self.create_contact()
-        instant_messaging = InstantMessagingModelFactory()
-        manager = models.Contact.objects
-        contact_instant_messaging = manager.instant_messaging_add(
-            contact, instant_messaging,
-            instant_messaging_type=InstantMessagingTypeModelFactory())
-        self.assertTrue(contact_instant_messaging,
-                        "ContactInstantMessaging creation error")
-        self.assertEqual(contact.instant_messaging.count(), 1)
-        ret = manager.instant_messaging_remove(
-            contact, instant_messaging)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_logo_add_remove(self):
-        contact = self.create_contact()
-        image_reference = ImageReferenceModelFactory(image=ImageModelFactory())
-        # use image instance
-        contact_logo = models.Contact.objects.logo_add(
-            contact, image_reference=image_reference,
-            logo_type=LogoTypeModelFactory())
-        self.assertTrue(contact_logo, "ContactLogo creation error")
-        self.assertEqual(contact.logos.count(), 1)
-        ret = models.Contact.objects.logo_remove(
-            contact, image_reference=image_reference)
-        self.assertEqual(ret[0], 1)
-
-        # use image url
-        url = "http://www.example.com/image.gif"
-        image_reference = ImageReferenceModelFactory(image=None, url=url)
-        contact_logo = models.Contact.objects.logo_add(
-            contact, image_reference=image_reference,
-            logo_type=LogoTypeModelFactory())
-        self.assertTrue(contact_logo, "ContactLogo creation error")
-        self.assertEqual(contact.logos.count(), 1)
-        ret = models.Contact.objects.logo_remove(
-            contact, image_reference=image_reference)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_language_add_remove(self):
-        contact = self.create_contact()
-        language = LanguageModelFactory()
-        contact_language = models.Contact.objects.language_add(
-            contact, language)
-        self.assertTrue(contact_language, "ContactLanguage creation error")
-        self.assertEqual(contact.languages.count(), 1)
-        ret = models.Contact.objects.language_remove(contact, language)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_name_add_remove(self):
-        contact = self.create_contact()
-        name = NameModelFactory()
-        contact_name = models.Contact.objects.name_add(contact, name)
-        self.assertTrue(contact_name, "ContactName creation error")
-        self.assertEqual(contact.names.count(), 1)
-        ret = models.Contact.objects.name_remove(contact, name)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_nickname_add_remove(self):
-        contact = self.create_contact()
-        name = NicknameModelFactory()
-        contact_nickname = models.Contact.objects.nickname_add(
-            contact, name, nickname_type=NicknameTypeModelFactory())
-        self.assertTrue(contact_nickname,
-                        "ContactNickname creation error")
-        self.assertEqual(contact.nicknames.count(), 1)
-        ret = models.Contact.objects.nickname_remove(contact, name)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_organization_add_remove(self):
-        contact = self.create_contact()
-        organization = OrganizationModelFactory()
-        unit = OrganizationUnitModelFactory(
-            organization=organization)
-        contact_organization = models.Contact.objects.organization_add(
-            contact, organization,
-            unit=unit)
-        self.assertTrue(contact_organization,
-                        "ContactOrganization creation error")
-        self.assertEqual(contact.organizations.count(), 1)
-        ret = models.Contact.objects.organization_remove(contact, organization)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_phone_add_remove(self):
-        contact = self.create_contact()
-        phone = PhoneModelFactory()
-        phone_type = PhoneTypeModelFactory()
-        contact_phone = models.Contact.objects.phone_add(
-            contact, phone,
-            phone_type=phone_type)
-        self.assertTrue(contact_phone,
-                        "ContactPhone creation error")
-        self.assertEqual(contact.phones.count(), 1)
-        ret = models.Contact.objects.phone_remove(contact, phone)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_photo_add_remove(self):
-        contact = self.create_contact()
-        image_reference = ImageReferenceModelFactory(image=ImageModelFactory())
-        # use image instance
-        contact_photo = models.Contact.objects.photo_add(
-            contact, image_reference=image_reference,
-            photo_type=PhotoTypeModelFactory())
-        self.assertTrue(contact_photo, "ContactPhoto creation error")
-        self.assertEqual(contact.photos.count(), 1)
-        ret = models.Contact.objects.photo_remove(
-            contact, image_reference=image_reference)
-        self.assertEqual(ret[0], 1)
-
-        # use image url
-        url = "http://www.example.com/image.gif"
-        image_reference = ImageReferenceModelFactory(image=None, url=url)
-        contact_photo = models.Contact.objects.photo_add(
-            contact, image_reference=image_reference,
-            photo_type=PhotoTypeModelFactory())
-        self.assertTrue(contact_photo, "ContactPhoto creation error")
-        self.assertEqual(contact.photos.count(), 1)
-        ret = models.Contact.objects.photo_remove(
-            contact, image_reference=image_reference)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_related_add_remove(self):
-        from_contact = self.create_contact()
-        to_contract = self.create_contact()
-        rel_type = factories.ContactRelationshipTypeModelFactory()
-        related_contact = models.Contact.objects.related_contact_add(
-            from_contact, to_contract,
-            contract_relationship_type=rel_type)
-        self.assertTrue(related_contact,
-                        "RelatedContact creation error")
-        self.assertEqual(from_contact.related_contacts.count(), 1)
-        ret = models.Contact.objects.related_contact_remove(
-            from_contact, to_contract)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_role_add_remove(self):
-        contact = self.create_contact()
-        role = RoleModelFactory()
-        organization = OrganizationModelFactory()
-        contact_role = models.Contact.objects.role_add(
-            contact, role,
-            organization=organization)
-        self.assertTrue(contact_role,
-                        "ContactRole creation error")
-        self.assertEqual(contact.roles.count(), 1)
-        ret = models.Contact.objects.role_remove(contact, role)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_timezone_add_remove(self):
-        contact = self.create_contact()
-        timezone = TimezoneModelFactory()
-        timezone_type = TimezoneTypeModelFactory()
-        contact_timezone = models.Contact.objects.timezone_add(
-            contact, timezone,
-            timezone_type=timezone_type)
-        self.assertTrue(contact_timezone,
-                        "ContactTimezone creation error")
-        self.assertEqual(contact.timezones.count(), 1)
-        ret = models.Contact.objects.timezone_remove(contact, timezone)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_title_add_remove(self):
-        contact = self.create_contact()
-        title = TitleModelFactory()
-        organization = OrganizationModelFactory()
-        contact_title = models.Contact.objects.title_add(
-            contact, title,
-            organization=organization)
-        self.assertTrue(contact_title,
-                        "ContactTitle creation error")
-        self.assertEqual(contact.titles.count(), 1)
-        ret = models.Contact.objects.title_remove(contact, title)
-        self.assertEqual(ret[0], 1)
-
-    def test_contact_url_add_remove(self):
-        contact = self.create_contact()
-        url = UrlModelFactory()
-        url_type = UrlTypeModelFactory()
-        contact_url = models.Contact.objects.url_add(
-            contact, url,
-            url_type=url_type)
-        self.assertTrue(contact_url,
-                        "ContactUrl creation error")
-        self.assertEqual(contact.urls.count(), 1)
-        ret = models.Contact.objects.url_remove(contact, url)
-        self.assertEqual(ret[0], 1)
-
 
 class ContactAssociationTestCase(VersionedModelTestCase):
     """Base class for contact association test cases."""
+
+    def create_contact(self, **kwargs):
+        name = kwargs.pop("name", None)
+        formatted_name = kwargs.pop("formatted_name", None)
+        if not (name or formatted_name):
+            name = NameModelFactory()
+        instance = factories.ContactModelFactory(
+            name=name, formatted_name=formatted_name, **kwargs)
+        instance.clean()
+        return instance
 
     def create_instance(self, factory_class, **kwargs):
         """Create instance of the designated class."""
@@ -447,6 +188,16 @@ class ContactAddressTestCase(ContactAssociationTestCase):
             factory_class=self.factory_class,
             attr_name=self.attr_name)
 
+    def test_contact_address_add_remove(self):
+        contact = self.create_contact()
+        address = factories.USAddressModelFactory()
+        contact_address = models.Contact.objects.address_add(
+            contact, address, address_type=AddressTypeModelFactory())
+        self.assertTrue(contact_address, "ContactAddress creation error")
+        self.assertEqual(contact.addresses.count(), 1)
+        ret = models.Contact.objects.address_remove(contact, address)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactAnnotationTestCase(ContactAssociationTestCase):
     """ContactAnnotation association model unit test class.
@@ -480,6 +231,16 @@ class ContactAnnotationTestCase(ContactAssociationTestCase):
             factory_class=self.factory_class,
             attr_name=self.attr_name)
 
+    def test_contact_annotation_add_remove(self):
+        contact = self.create_contact()
+        annotation = factories.AnnotationModelFactory()
+        contact_annotation = models.Contact.objects.annotation_add(
+            contact, annotation)
+        self.assertTrue(contact_annotation, "ContactAnnotation creation error")
+        self.assertEqual(contact.annotations.count(), 1)
+        ret = models.Contact.objects.annotation_remove(contact, annotation)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactCategoryTestCase(ContactAssociationTestCase):
     """ContactCategory association model unit test class.
@@ -507,6 +268,21 @@ class ContactCategoryTestCase(ContactAssociationTestCase):
 
     def test_contact_delete(self):
         self.verify_contact_delete(self.factory_class)
+
+    def test_category_delete(self):
+        self.verify_other_delete(
+            factory_class=self.factory_class,
+            attr_name=self.attr_name)
+
+    def test_contact_category_add_remove(self):
+        contact = self.create_contact()
+        category = factories.CategoryModelFactory()
+        contact_category = models.Contact.objects.category_add(
+            contact, category)
+        self.assertTrue(contact_category, "ContactCategory creation error")
+        self.assertEqual(contact.categories.count(), 1)
+        ret = models.Contact.objects.category_remove(contact, category)
+        self.assertEqual(ret[0], 1)
 
 
 class ContactEmailTestCase(ContactAssociationTestCase):
@@ -540,6 +316,17 @@ class ContactEmailTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_email_add_remove(self):
+        contact = self.create_contact()
+        email = EmailModelFactory()
+        contact_email = models.Contact.objects.email_add(
+            contact, email)
+        self.assertTrue(contact_email,
+                        "ContactEmail creation error")
+        self.assertEqual(contact.emails.count(), 1)
+        ret = models.Contact.objects.email_remove(contact, email)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactGeographicLocationTestCase(ContactAssociationTestCase):
     """ContactGeographicLocation association model unit test class.
@@ -571,6 +358,18 @@ class ContactGeographicLocationTestCase(ContactAssociationTestCase):
     def test_group_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
+
+    def test_contact_geographic_location_add_remove(self):
+        contact = self.create_contact()
+        geographic_location = GeographicLocationModelFactory()
+        manager = models.Contact.objects
+        contact_geographic_location = manager.geographic_location_add(
+            contact, geographic_location)
+        self.assertTrue(contact_geographic_location,
+                        "ContactGeographicLocation creation error")
+        self.assertEqual(contact.geographic_locations.count(), 1)
+        ret = manager.geographic_location_remove(contact, geographic_location)
+        self.assertEqual(ret[0], 1)
 
 
 class ContactGroupTestCase(ContactAssociationTestCase):
@@ -604,6 +403,16 @@ class ContactGroupTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_group_add_remove(self):
+        contact = self.create_contact()
+        group = GroupModelFactory()
+        contact_group = models.Contact.objects.group_add(contact, group)
+        self.assertTrue(contact_group,
+                        "ContactGroup creation error")
+        self.assertEqual(contact.groups.count(), 1)
+        ret = models.Contact.objects.group_remove(contact, group)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactFormattedNameTestCase(ContactAssociationTestCase):
     """ContactFormattedName association model unit test class.
@@ -635,6 +444,17 @@ class ContactFormattedNameTestCase(ContactAssociationTestCase):
     def test_name_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
+
+    def test_contact_formatted_name_add_remove(self):
+        contact = self.create_contact()
+        name = FormattedNameModelFactory()
+        contact_formatted_name = models.Contact.objects.formatted_name_add(
+            contact, name)
+        self.assertTrue(contact_formatted_name,
+                        "ContactFormattedName creation error")
+        self.assertEqual(contact.formatted_names.count(), 1)
+        ret = models.Contact.objects.formatted_name_remove(contact, name)
+        self.assertEqual(ret[0], 1)
 
 
 class ContactInstantMessagingTestCase(ContactAssociationTestCase):
@@ -668,6 +488,20 @@ class ContactInstantMessagingTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_instant_messaging_add_remove(self):
+        contact = self.create_contact()
+        instant_messaging = InstantMessagingModelFactory()
+        manager = models.Contact.objects
+        contact_instant_messaging = manager.instant_messaging_add(
+            contact, instant_messaging,
+            instant_messaging_type=InstantMessagingTypeModelFactory())
+        self.assertTrue(contact_instant_messaging,
+                        "ContactInstantMessaging creation error")
+        self.assertEqual(contact.instant_messaging.count(), 1)
+        ret = manager.instant_messaging_remove(
+            contact, instant_messaging)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactLanguageTestCase(ContactAssociationTestCase):
     """ContactLanguage association model unit test class.
@@ -700,6 +534,16 @@ class ContactLanguageTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_language_add_remove(self):
+        contact = self.create_contact()
+        language = LanguageModelFactory()
+        contact_language = models.Contact.objects.language_add(
+            contact, language)
+        self.assertTrue(contact_language, "ContactLanguage creation error")
+        self.assertEqual(contact.languages.count(), 1)
+        ret = models.Contact.objects.language_remove(contact, language)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactLogoTestCase(ContactAssociationTestCase):
     """ContactLogo association model unit test class.
@@ -728,9 +572,34 @@ class ContactLogoTestCase(ContactAssociationTestCase):
     def test_contact_delete(self):
         self.verify_contact_delete(self.factory_class)
 
-    def test_image_delete(self):
+    def test_logo_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
+
+    def test_contact_logo_add_remove(self):
+        contact = self.create_contact()
+        image_reference = ImageReferenceModelFactory(image=ImageModelFactory())
+        # use image instance
+        contact_logo = models.Contact.objects.logo_add(
+            contact, image_reference=image_reference,
+            logo_type=LogoTypeModelFactory())
+        self.assertTrue(contact_logo, "ContactLogo creation error")
+        self.assertEqual(contact.logos.count(), 1)
+        ret = models.Contact.objects.logo_remove(
+            contact, image_reference=image_reference)
+        self.assertEqual(ret[0], 1)
+
+        # use image url
+        url = "http://www.example.com/image.gif"
+        image_reference = ImageReferenceModelFactory(image=None, url=url)
+        contact_logo = models.Contact.objects.logo_add(
+            contact, image_reference=image_reference,
+            logo_type=LogoTypeModelFactory())
+        self.assertTrue(contact_logo, "ContactLogo creation error")
+        self.assertEqual(contact.logos.count(), 1)
+        ret = models.Contact.objects.logo_remove(
+            contact, image_reference=image_reference)
+        self.assertEqual(ret[0], 1)
 
 
 class ContactNameTestCase(ContactAssociationTestCase):
@@ -764,6 +633,15 @@ class ContactNameTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_name_add_remove(self):
+        contact = self.create_contact()
+        name = NameModelFactory()
+        contact_name = models.Contact.objects.name_add(contact, name)
+        self.assertTrue(contact_name, "ContactName creation error")
+        self.assertEqual(contact.names.count(), 1)
+        ret = models.Contact.objects.name_remove(contact, name)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactNicknameTestCase(ContactAssociationTestCase):
     """ContactNickname association model unit test class.
@@ -795,6 +673,17 @@ class ContactNicknameTestCase(ContactAssociationTestCase):
     def test_name_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
+
+    def test_contact_nickname_add_remove(self):
+        contact = self.create_contact()
+        name = NicknameModelFactory()
+        contact_nickname = models.Contact.objects.nickname_add(
+            contact, name, nickname_type=NicknameTypeModelFactory())
+        self.assertTrue(contact_nickname,
+                        "ContactNickname creation error")
+        self.assertEqual(contact.nicknames.count(), 1)
+        ret = models.Contact.objects.nickname_remove(contact, name)
+        self.assertEqual(ret[0], 1)
 
 
 class ContactOrganizationTestCase(ContactAssociationTestCase):
@@ -828,6 +717,20 @@ class ContactOrganizationTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_organization_add_remove(self):
+        contact = self.create_contact()
+        organization = OrganizationModelFactory()
+        unit = OrganizationUnitModelFactory(
+            organization=organization)
+        contact_organization = models.Contact.objects.organization_add(
+            contact, organization,
+            unit=unit)
+        self.assertTrue(contact_organization,
+                        "ContactOrganization creation error")
+        self.assertEqual(contact.organizations.count(), 1)
+        ret = models.Contact.objects.organization_remove(contact, organization)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactPhoneTestCase(ContactAssociationTestCase):
     """ContactPhone association model unit test class.
@@ -860,6 +763,19 @@ class ContactPhoneTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_phone_add_remove(self):
+        contact = self.create_contact()
+        phone = PhoneModelFactory()
+        phone_type = PhoneTypeModelFactory()
+        contact_phone = models.Contact.objects.phone_add(
+            contact, phone,
+            phone_type=phone_type)
+        self.assertTrue(contact_phone,
+                        "ContactPhone creation error")
+        self.assertEqual(contact.phones.count(), 1)
+        ret = models.Contact.objects.phone_remove(contact, phone)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactPhotoTestCase(ContactAssociationTestCase):
     """ContactPhoto association model unit test class.
@@ -891,6 +807,31 @@ class ContactPhotoTestCase(ContactAssociationTestCase):
     def test_photo_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
+
+    def test_contact_photo_add_remove(self):
+        contact = self.create_contact()
+        image_reference = ImageReferenceModelFactory(image=ImageModelFactory())
+        # use image instance
+        contact_photo = models.Contact.objects.photo_add(
+            contact, image_reference=image_reference,
+            photo_type=PhotoTypeModelFactory())
+        self.assertTrue(contact_photo, "ContactPhoto creation error")
+        self.assertEqual(contact.photos.count(), 1)
+        ret = models.Contact.objects.photo_remove(
+            contact, image_reference=image_reference)
+        self.assertEqual(ret[0], 1)
+
+        # use image url
+        url = "http://www.example.com/image.gif"
+        image_reference = ImageReferenceModelFactory(image=None, url=url)
+        contact_photo = models.Contact.objects.photo_add(
+            contact, image_reference=image_reference,
+            photo_type=PhotoTypeModelFactory())
+        self.assertTrue(contact_photo, "ContactPhoto creation error")
+        self.assertEqual(contact.photos.count(), 1)
+        ret = models.Contact.objects.photo_remove(
+            contact, image_reference=image_reference)
+        self.assertEqual(ret[0], 1)
 
 
 class RelatedContactTestCase(ContactAssociationTestCase):
@@ -929,6 +870,20 @@ class RelatedContactTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_related_add_remove(self):
+        from_contact = self.create_contact()
+        to_contract = self.create_contact()
+        rel_type = factories.ContactRelationshipTypeModelFactory()
+        related_contact = models.Contact.objects.related_contact_add(
+            from_contact, to_contract,
+            contract_relationship_type=rel_type)
+        self.assertTrue(related_contact,
+                        "RelatedContact creation error")
+        self.assertEqual(from_contact.related_contacts.count(), 1)
+        ret = models.Contact.objects.related_contact_remove(
+            from_contact, to_contract)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactRoleTestCase(ContactAssociationTestCase):
     """ContactRole association model unit test class.
@@ -960,6 +915,19 @@ class ContactRoleTestCase(ContactAssociationTestCase):
     def test_role_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
+
+    def test_contact_role_add_remove(self):
+        contact = self.create_contact()
+        role = RoleModelFactory()
+        organization = OrganizationModelFactory()
+        contact_role = models.Contact.objects.role_add(
+            contact, role,
+            organization=organization)
+        self.assertTrue(contact_role,
+                        "ContactRole creation error")
+        self.assertEqual(contact.roles.count(), 1)
+        ret = models.Contact.objects.role_remove(contact, role)
+        self.assertEqual(ret[0], 1)
 
 
 class ContactTimezoneTestCase(ContactAssociationTestCase):
@@ -993,6 +961,19 @@ class ContactTimezoneTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_timezone_add_remove(self):
+        contact = self.create_contact()
+        timezone = TimezoneModelFactory()
+        timezone_type = TimezoneTypeModelFactory()
+        contact_timezone = models.Contact.objects.timezone_add(
+            contact, timezone,
+            timezone_type=timezone_type)
+        self.assertTrue(contact_timezone,
+                        "ContactTimezone creation error")
+        self.assertEqual(contact.timezones.count(), 1)
+        ret = models.Contact.objects.timezone_remove(contact, timezone)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactTitleTestCase(ContactAssociationTestCase):
     """ContactTitle association model unit test class.
@@ -1025,6 +1006,19 @@ class ContactTitleTestCase(ContactAssociationTestCase):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
 
+    def test_contact_title_add_remove(self):
+        contact = self.create_contact()
+        title = TitleModelFactory()
+        organization = OrganizationModelFactory()
+        contact_title = models.Contact.objects.title_add(
+            contact, title,
+            organization=organization)
+        self.assertTrue(contact_title,
+                        "ContactTitle creation error")
+        self.assertEqual(contact.titles.count(), 1)
+        ret = models.Contact.objects.title_remove(contact, title)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactUrlTestCase(ContactAssociationTestCase):
     """ContactUrl association model unit test class.
@@ -1056,3 +1050,16 @@ class ContactUrlTestCase(ContactAssociationTestCase):
     def test_url_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
+
+    def test_contact_url_add_remove(self):
+        contact = self.create_contact()
+        url = UrlModelFactory()
+        url_type = UrlTypeModelFactory()
+        contact_url = models.Contact.objects.url_add(
+            contact, url,
+            url_type=url_type)
+        self.assertTrue(contact_url,
+                        "ContactUrl creation error")
+        self.assertEqual(contact.urls.count(), 1)
+        ret = models.Contact.objects.url_remove(contact, url)
+        self.assertEqual(ret[0], 1)

@@ -6,28 +6,26 @@
 """
 from __future__ import absolute_import, print_function
 
-import factory.fuzzy
+import factory
 
-from django_core_utils.tests.factories import (NamedModelFactory,
-                                               VersionedModelFactory)
-
-from django_core_models.social_media.tests.factories import (EmailModelFactory,
-                                                             GroupModelFactory,
-                                                             NameModelFactory,
-                                                             FormattedNameModelFactory,
-                                                             InstantMessagingModelFactory,
-                                                             NicknameModelFactory,
-                                                             PhoneModelFactory,
-                                                             UrlModelFactory)
-from django_core_models.locations.tests.factories import (
-    GeographicLocationModelFactory, LanguageModelFactory, TimezoneModelFactory,
-    USAddressModelFactory)
 from django_core_models.core.tests.factories import (
     AnnotationModelFactory, CategoryModelFactory)
 from django_core_models.images.tests.factories import (
     ImageReferenceModelFactory)
+from django_core_models.locations.tests.factories import (
+    GeographicLocationModelFactory, LanguageModelFactory,
+    TimezoneModelFactory, USAddressModelFactory)
 from django_core_models.organizations.tests.factories import (
-    OrganizationModelFactory, RoleModelFactory, TitleModelFactory)
+    OrganizationModelFactory, RoleModelFactory,
+    TitleModelFactory)
+from django_core_models.social_media.tests.factories import (
+    EmailModelFactory, FormattedNameModelFactory,
+    GroupModelFactory, InstantMessagingModelFactory,
+    NameModelFactory, NicknameModelFactory,
+    PhoneModelFactory, UrlModelFactory)
+from django_core_utils.tests.factories import (
+    NamedModelFactory, VersionedModelFactory)
+
 from .. import models
 
 
