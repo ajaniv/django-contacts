@@ -25,7 +25,7 @@ from django_core_models.images.tests.factories import (
     ImageModelFactory, ImageReferenceModelFactory)
 from django_core_models.organizations.tests.factories import (
     OrganizationModelFactory, OrganizationUnitModelFactory,
-    RoleModelFactory)
+    RoleModelFactory, TitleModelFactory)
 
 
 from . import factories
@@ -319,6 +319,19 @@ class ContactTestCase(VersionedModelTestCase):
         ret = models.Contact.objects.timezone_remove(contact, timezone)
         self.assertEqual(ret[0], 1)
 
+    def test_contact_title_add_remove(self):
+        contact = self.create_contact()
+        title = TitleModelFactory()
+        organization = OrganizationModelFactory()
+        contact_title = models.Contact.objects.title_add(
+            contact, title,
+            organization=organization)
+        self.assertTrue(contact_title,
+                        "ContactTitle creation error")
+        self.assertEqual(contact.titles.count(), 1)
+        ret = models.Contact.objects.title_remove(contact, title)
+        self.assertEqual(ret[0], 1)
+
 
 class ContactAssociationTestCase(VersionedModelTestCase):
     """Base class for contact association test cases."""
@@ -364,7 +377,7 @@ class ContactAssociationTestCase(VersionedModelTestCase):
                 other_class.objects.count(), expected_other_model_count,
                 "unexpected %s  instances" % class_name(other_class))
 
-    def verify_contact_delete(self, factory_class, 
+    def verify_contact_delete(self, factory_class,
                               contact_attr_name=None,  **kwargs):
         """Verify contact delete propagation."""
         instance = self.create_instance(factory_class, **kwargs)
@@ -964,5 +977,37 @@ class ContactTimezoneTestCase(ContactAssociationTestCase):
         self.verify_contact_delete(self.factory_class)
 
     def test_timezone_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class ContactTitleTestCase(ContactAssociationTestCase):
+    """ContactTitle association model unit test class.
+    """
+    factory_class = factories.ContactTitleModelFactory
+    association_name = "titles"
+    other_class = models.Title
+    attr_name = "title"
+
+    def test_contact_title_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_title_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name)
+
+    def test_contact_title_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class)
+
+    def test_title_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)

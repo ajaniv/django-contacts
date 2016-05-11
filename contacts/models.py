@@ -377,6 +377,17 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactTimezone, contact=contact, timezone=timezone)
 
+    def title_add(self, contact, title, **kwargs):
+        """Add contact and title association."""
+        params = create_fields(contact, **kwargs)
+        return create_association(ContactTitle, contact=contact,
+                                  title=title, **params)
+
+    def title_remove(self, contact, title):
+        """Remove contact and title association."""
+        return delete_association(
+            ContactTitle, contact=contact, title=title)
+
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
 
@@ -842,6 +853,31 @@ class ContactTimezone(ContactsModel):
         unique_together = (
             "contact", "timezone", "timezone_type")
 
+_contact_title = "ContactTitle"
+_contact_title_verbose = humanize(underscore(_contact_title))
+
+
+class ContactTitle(ContactsModel):
+    """
+    Contact title model class.
+
+    Within the context of an organization, capture contact title attributes.
+    A contact may be associated with multiple titles:
+        Contact(1) -----> Title(0:*)
+
+    The organization for which the title is in effect is optional.
+    """
+    contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
+    title = fields.foreign_key_field(Title, on_delete=CASCADE)
+    organization = fields.foreign_key_field(Organization,
+                                            blank=True, null=True)
+
+    class Meta(ContactsModel.Meta):
+        db_table = db_table(_app_label, _contact_title)
+        verbose_name = _(_contact_title_verbose)
+        verbose_name_plural = _(pluralize(_contact_title_verbose))
+        unique_together = ("contact", "title", "organization")
+
 _contact_url = "ContactUrl"
 _contact_url_verbose = humanize(underscore(_contact_url))
 
@@ -866,30 +902,7 @@ class ContactUrl(ContactsModel):
 
 
 
-_contact_title = "ContactTitle"
-_contact_title_verbose = humanize(underscore(_contact_title))
 
-
-class ContactTitle(ContactsModel):
-    """
-    Contact title model class.
-
-    Within the context of an organization, capture contact title attributes.
-    A contact may be associated with multiple titles:
-        Contact(1) -----> Title(0:*)
-
-    The organization for which the title is in effect is optional.
-    """
-    contact = fields.foreign_key_field(Contact)
-    title = fields.foreign_key_field(Title)
-    organization = fields.foreign_key_field(Organization,
-                                            blank=True, null=True)
-
-    class Meta(ContactsModel.Meta):
-        db_table = db_table(_app_label, _contact_title)
-        verbose_name = _(_contact_title_verbose)
-        verbose_name_plural = _(pluralize(_contact_title_verbose))
-        unique_together = ('contact', 'title', 'organization')
 
 
 _related_contact = "RelatedContact"

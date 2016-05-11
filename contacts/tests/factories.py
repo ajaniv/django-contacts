@@ -26,7 +26,7 @@ from django_core_models.core.tests.factories import (
 from django_core_models.images.tests.factories import (
     ImageReferenceModelFactory)
 from django_core_models.organizations.tests.factories import (
-    OrganizationModelFactory, RoleModelFactory)
+    OrganizationModelFactory, RoleModelFactory, TitleModelFactory)
 from .. import models
 
 
@@ -266,3 +266,14 @@ class ContactTimezoneModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactTimezone
+
+
+class ContactTitleModelFactory(ContactsModelFactory):
+    """ContactTitle association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    title = factory.SubFactory(TitleModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactTitle
