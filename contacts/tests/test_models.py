@@ -95,7 +95,7 @@ class ContactAssociationTestCase(VersionedModelTestCase):
         return self.verify_create(factory_class, **kwargs)
 
     def verify_access(self, factory_class, association_name,
-                      attr_name,  contact_attr_name=None,
+                      attr_name, contact_attr_name=None,
                       **kwargs):
         """Verify association access"""
         instance = self.create_instance(factory_class, **kwargs)
@@ -132,7 +132,7 @@ class ContactAssociationTestCase(VersionedModelTestCase):
                 "unexpected %s  instances" % class_name(other_class))
 
     def verify_contact_delete(self, factory_class,
-                              contact_attr_name=None,  **kwargs):
+                              contact_attr_name=None, **kwargs):
         """Verify contact delete propagation."""
         instance = self.create_instance(factory_class, **kwargs)
         contact_attr_name = contact_attr_name or "contact"

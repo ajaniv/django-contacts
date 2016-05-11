@@ -1,0 +1,59 @@
+# django-contacts project travis config file
+# @TODO: change email address
+# @TODO: eliminate compose version update
+
+language: python
+sudo: true
+
+python: '3.5'
+
+services:
+  - docker
+env:
+  global:
+    - COMPOSE_VERSION=1.6.2
+
+  matrix:
+    - TOX_ENV=py35-django18
+    - TOX_ENV=py35-django19
+    - COMPOSE_FILE='docker-sqlite-compose-test.yml'
+    - COMPOSE_FILE='docker-mysql-compose-test.yml'
+    - COMPOSE_FILE='docker-postgres-compose-test.yml'
+ 
+matrix:
+  fast_finish: true
+  include:
+    - python: '2.7'
+      env: TOX_ENV=py27-django19
+    - python: '2.7'
+      env: TOX_ENV=py27-django18
+
+
+before_install:
+- if [[ $COMPOSE_FILE ]]; 
+  then ./docker/docker_update.sh;
+  fi
+
+
+script:
+  - if [ -z "$COMPOSE_FILE" ]; 
+    then tox -e $TOX_ENV;
+    else docker-compose -f $COMPOSE_FILE up --abort-on-container-exit;
+    fi
+
+install:
+  - pip install tox
+
+
+notifications:
+  email:
+    recipients:
+      - amnon.janiv@ondalear.com
+
+    on_success: change
+    on_failure: always
+  
+branches:
+  only:
+    - master
+    - develop

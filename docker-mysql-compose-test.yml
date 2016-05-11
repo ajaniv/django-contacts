@@ -1,0 +1,32 @@
+# docker-compose mysql configuration file
+version: '2'
+services:
+  db-mysql:
+    restart: always
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+    # In a 'real' environment passwords will be defined in the environment
+    # by only using the key
+    - MYSQL_ROOT_PASSWORD=rootpassword
+    - MYSQL_USER=test_user
+    - MYSQL_PASSWORD=test_user
+    - MYSQL_DATABASE=django_core_utils
+    
+  web-mysql:
+    build: 
+      context: .
+      dockerfile: docker-mysql-dockerfile-test.yml
+    command: docker/run_tests.sh -w 3 -t mysql -d db-mysql
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db-mysql
+    env_file: 
+      - docker/env/common
+      - docker/env/testing/mysql
+      
+  

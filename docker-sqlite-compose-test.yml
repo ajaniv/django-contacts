@@ -1,0 +1,16 @@
+# docker-compose sqlite configuration file
+version: '2'
+services:
+  web-sqlite:
+    build:
+      context: .
+      dockerfile: docker-sqlite-dockerfile-test.yml
+    command: docker/run_tests.sh -d 1
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    env_file: 
+      - ./docker/env/common
+      - ./docker/env/sqlite
+

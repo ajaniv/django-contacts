@@ -40,7 +40,7 @@ setup(
     install_requires=[
         'python-core-utils',
         'django-core-utils',
-        'django-core-models'
+        'django-core-models',
         'Django>=1.9.0'
     ],
     dependency_links=[

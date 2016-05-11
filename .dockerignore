@@ -1,0 +1,10 @@
+venv
+*.rst
+*.md
+.git
+.tox
+.settings
+.coverage
+src
+*.pyc
+__pycache__

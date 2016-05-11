@@ -31,20 +31,18 @@ or organization of instances using the definition of an associated 'Type' class
 #    would be:
 #        'sl_contacts_contact_name'
 #
-# @TODO: how to model organization contact vs person contact; via contact type?
-# @TODO: how to handle multiple addresses per contact (i.e preferred)
-# @TODO: add contact Media
-# @TODO: add missing rfc6350 fields (i.e. Contact Key, audio see https://github.com/areski/django-audiofield)
-# @TODO: add manager classes
-# @TODO: For image, review approach to have bundled thumbnail/compressed version
+
+# @TODO: add missing rfc6350 fields (i.e. Contact Key, audio, Media
+#        see https://github.com/areski/django-audiofield)
+# @TODO: For image, review approach to have bundled
+#        thumbnail/compressed version
 # @TODO: check implementation of related contact when uri is used,not contact
 #        defined in model
-# @TODO: contact accesss requires quite a few joins, look at optimizaiton
+# @TODO: contact accesss requires quite a few joins, look at optimization
 # @TODO: str methods
-
-
-# @TODO: review unique together
-# @TODO: review on_delete=CASCADE for reference data types in many-2-many relationships
+# @TODO: review on_delete=CASCADE for reference data types
+#        in many-2-many relationships
+# @TODO: review manager add/remove method implementation; too many methods
 from __future__ import absolute_import
 
 # @TODO: review class field layout
@@ -54,6 +52,9 @@ import logging
 from django.db.models import CASCADE
 from django.utils.translation import ugettext_lazy as _
 from inflection import humanize, pluralize, underscore
+
+from python_core_utils.core import class_name
+from django_core_utils import fields
 
 from django_core_models.core.models import Annotation, Category
 from django_core_models.demographics.models import Gender
@@ -74,11 +75,11 @@ from django_core_models.social_media.models import (Email, EmailType,
                                                     NicknameType, Phone,
                                                     PhoneType, PhotoType, Url,
                                                     UrlType)
-from django_core_utils import fields
+
 from django_core_utils.models import (NamedModel, PrioritizedModel,
                                       VersionedModel, VersionedModelManager,
                                       db_table)
-from python_core_utils.core import class_name
+
 
 from . import validation
 
@@ -171,9 +172,9 @@ class ContactManager(VersionedModelManager):
     def address_add(self, contact, address, **kwargs):
         """Add contact and address association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactAddress.objects.create(
-            contact=contact, address=address, **params)
-        return instance
+        return create_association(
+            ContactAddress, contact=contact,
+            address=address, **params)
 
     def address_remove(self, contact, address, **kwargs):
         """Remove contact and address association."""
@@ -183,9 +184,9 @@ class ContactManager(VersionedModelManager):
     def annotation_add(self, contact, annotation, **kwargs):
         """Add contact and annotation association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactAnnotation.objects.create(
-            contact=contact, annotation=annotation, **params)
-        return instance
+        return create_association(
+            ContactAnnotation, contact=contact,
+            annotation=annotation, **params)
 
     def annotation_remove(self, contact, annotation, **kwargs):
         """Remove contact and annotation association."""
@@ -195,9 +196,9 @@ class ContactManager(VersionedModelManager):
     def category_add(self, contact, category, **kwargs):
         """Add contact and categry association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactCategory.objects.create(
-            contact=contact, category=category, **params)
-        return instance
+        return create_association(
+            ContactCategory, contact=contact,
+            category=category, **params)
 
     def category_remove(self, contact, category):
         """Remove contact and category association."""
@@ -207,9 +208,9 @@ class ContactManager(VersionedModelManager):
     def email_add(self, contact, email, **kwargs):
         """Add contact and email association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactEmail.objects.create(
-            contact=contact, email=email, **params)
-        return instance
+        return create_association(
+            ContactEmail, contact=contact,
+            email=email, **params)
 
     def email_remove(self, contact, email):
         """Remove contact and email association."""
@@ -219,9 +220,9 @@ class ContactManager(VersionedModelManager):
     def formatted_name_add(self, contact, name, **kwargs):
         """Add contact and formatted name association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactFormattedName.objects.create(
-            contact=contact, name=name, **params)
-        return instance
+        return create_association(
+            ContactFormattedName, contact=contact,
+            name=name, **params)
 
     def formatted_name_remove(self, contact, name):
         """Remove contact and formatted name association."""
@@ -231,9 +232,9 @@ class ContactManager(VersionedModelManager):
     def geographic_location_add(self, contact, geographic_location, **kwargs):
         """Add contact and geographic location association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactGeographicLocation.objects.create(
-            contact=contact, geographic_location=geographic_location, **params)
-        return instance
+        return create_association(
+            ContactGeographicLocation, contact=contact,
+            geographic_location=geographic_location, **params)
 
     def geographic_location_remove(self, contact, geographic_location):
         """Remove contact and geographic location association."""
@@ -244,9 +245,9 @@ class ContactManager(VersionedModelManager):
     def group_add(self, contact, group, **kwargs):
         """Add contact and group association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactGroup.objects.create(
-            contact=contact, group=group, **params)
-        return instance
+        return create_association(
+            ContactGroup, contact=contact,
+            group=group, **params)
 
     def group_remove(self, contact, group):
         """Remove contact and group association."""
@@ -256,9 +257,9 @@ class ContactManager(VersionedModelManager):
     def instant_messaging_add(self, contact, instant_messaging, **kwargs):
         """Add contact and instant messaging association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactInstantMessaging.objects.create(
-            contact=contact, instant_messaging=instant_messaging, **params)
-        return instance
+        return create_association(
+            ContactInstantMessaging, contact=contact,
+            instant_messaging=instant_messaging, **params)
 
     def instant_messaging_remove(self, contact, instant_messaging):
         """Remove contact and instant_messaging association."""
@@ -269,9 +270,9 @@ class ContactManager(VersionedModelManager):
     def language_add(self, contact, language, **kwargs):
         """Add contact and language association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactLanguage.objects.create(
-            contact=contact, language=language, **params)
-        return instance
+        return create_association(
+            ContactLanguage, contact=contact,
+            language=language, **params)
 
     def language_remove(self, contact, language):
         """Remove contact and language association."""
@@ -279,12 +280,12 @@ class ContactManager(VersionedModelManager):
             ContactLanguage, contact=contact,
             language=language)
 
-    def logo_add(self, contact, image_reference,  **kwargs):
+    def logo_add(self, contact, image_reference, **kwargs):
         """Add contact and logo  association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactLogo.objects.create(
-            contact=contact, image_reference=image_reference, **params)
-        return instance
+        return create_association(
+            ContactLogo, contact=contact,
+            image_reference=image_reference, **params)
 
     def logo_remove(self, contact, image_reference):
         """Remove contact and logo association."""
@@ -295,9 +296,9 @@ class ContactManager(VersionedModelManager):
     def name_add(self, contact, name, **kwargs):
         """Add contact and name association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactName.objects.create(
-            contact=contact, name=name, **params)
-        return instance
+        return create_association(
+            ContactName, contact=contact,
+            name=name, **params)
 
     def name_remove(self, contact, name):
         """Remove contact and name association."""
@@ -306,9 +307,9 @@ class ContactManager(VersionedModelManager):
     def nickname_add(self, contact, name, **kwargs):
         """Add contact and nickname association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactNickname.objects.create(
-            contact=contact, name=name, **params)
-        return instance
+        return create_association(
+            ContactNickname, contact=contact,
+            name=name, **params)
 
     def nickname_remove(self, contact, name):
         """Remove contact and nickname association."""
@@ -317,9 +318,9 @@ class ContactManager(VersionedModelManager):
     def organization_add(self, contact, organization, **kwargs):
         """Add contact and organization association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactOrganization.objects.create(
-            contact=contact, organization=organization, **params)
-        return instance
+        return create_association(
+            ContactOrganization, contact=contact,
+            organization=organization, **params)
 
     def organization_remove(self, contact, organization):
         """Remove contact and organization association."""
@@ -329,9 +330,9 @@ class ContactManager(VersionedModelManager):
     def phone_add(self, contact, phone, **kwargs):
         """Add contact and phone association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactPhone.objects.create(
-            contact=contact, phone=phone, **params)
-        return instance
+        return create_association(
+            ContactPhone, contact=contact,
+            phone=phone, **params)
 
     def phone_remove(self, contact, phone):
         """Remove contact and phone association."""
@@ -341,9 +342,9 @@ class ContactManager(VersionedModelManager):
     def photo_add(self, contact, image_reference, **kwargs):
         """Add contact and photo association."""
         params = create_fields(contact, **kwargs)
-        instance = ContactPhoto.objects.create(
-            contact=contact, image_reference=image_reference, **params)
-        return instance
+        return create_association(
+            ContactPhoto, contact=contact,
+            image_reference=image_reference, **params)
 
     def photo_remove(self, contact, image_reference):
         """Remove contact and photo association."""
@@ -353,8 +354,9 @@ class ContactManager(VersionedModelManager):
     def related_contact_add(self, from_contact, to_contact, **kwargs):
         """Add contact and photo association."""
         params = create_fields(from_contact, **kwargs)
-        return create_association(RelatedContact, from_contact=from_contact,
-                                  to_contact=to_contact, **params)
+        return create_association(
+            RelatedContact, from_contact=from_contact,
+            to_contact=to_contact, **params)
 
     def related_contact_remove(self, from_contact, to_contact):
         """Remove contact and photo association."""
@@ -364,8 +366,9 @@ class ContactManager(VersionedModelManager):
     def role_add(self, contact, role, **kwargs):
         """Add contact and role association."""
         params = create_fields(contact, **kwargs)
-        return create_association(ContactRole, contact=contact,
-                                  role=role, **params)
+        return create_association(
+            ContactRole, contact=contact,
+            role=role, **params)
 
     def role_remove(self, contact, role):
         """Remove contact and role association."""
@@ -375,8 +378,9 @@ class ContactManager(VersionedModelManager):
     def timezone_add(self, contact, timezone, **kwargs):
         """Add contact and timezone association."""
         params = create_fields(contact, **kwargs)
-        return create_association(ContactTimezone, contact=contact,
-                                  timezone=timezone, **params)
+        return create_association(
+            ContactTimezone, contact=contact,
+            timezone=timezone, **params)
 
     def timezone_remove(self, contact, timezone):
         """Remove contact and timezone association."""
@@ -386,8 +390,9 @@ class ContactManager(VersionedModelManager):
     def title_add(self, contact, title, **kwargs):
         """Add contact and title association."""
         params = create_fields(contact, **kwargs)
-        return create_association(ContactTitle, contact=contact,
-                                  title=title, **params)
+        return create_association(
+            ContactTitle, contact=contact,
+            title=title, **params)
 
     def title_remove(self, contact, title):
         """Remove contact and title association."""
@@ -397,8 +402,9 @@ class ContactManager(VersionedModelManager):
     def url_add(self, contact, url, **kwargs):
         """Add contact and url association."""
         params = create_fields(contact, **kwargs)
-        return create_association(ContactUrl, contact=contact,
-                                  url=url, **params)
+        return create_association(
+            ContactUrl, contact=contact,
+            url=url, **params)
 
     def url_remove(self, contact, url):
         """Remove contact and url association."""
@@ -417,15 +423,15 @@ class Contact(ContactsModel):
 
     Either name or formatted name have to be set on an instance.
     """
+    formatted_name = fields.foreign_key_field(
+        FormattedName, blank=True, null=True)
+    name = fields.foreign_key_field(Name, blank=True, null=True)
+
     # 'simple fields'
     anniversary = fields.date_field(blank=True, null=True)
     birth_date = fields.date_field(blank=True, null=True)
     contact_type = fields.foreign_key_field(ContactType, blank=True, null=True)
-    formatted_name = fields.foreign_key_field(
-        FormattedName, blank=True, null=True)
     gender = fields.foreign_key_field(Gender, blank=True, null=True)
-
-    name = fields.foreign_key_field(Name, blank=True, null=True)
 
     # many-2-many fields
     addresses = fields.many_to_many_field(Address, through="ContactAddress")
@@ -437,13 +443,13 @@ class Contact(ContactsModel):
                                        through="ContactEmail")
     formatted_names = fields.many_to_many_field(FormattedName,
                                                 through="ContactFormattedName")
+    geographic_locations = fields.many_to_many_field(
+        GeographicLocation, through="ContactGeographicLocation")
     groups = fields.many_to_many_field(Group,
                                        through="ContactGroup")
     instant_messaging = fields.many_to_many_field(
         InstantMessaging, through="ContactInstantMessaging")
     languages = fields.many_to_many_field(Language, through="ContactLanguage")
-    geographic_locations = fields.many_to_many_field(
-        GeographicLocation, through="ContactGeographicLocation")
     logos = fields.many_to_many_field(
         ImageReference, through="ContactLogo",
         related_name="%(app_label)s_%(class)s_related_contact_logo")
@@ -581,7 +587,7 @@ class ContactFormattedName(ContactsModel):
 
 _contact_geographic_location = "ContactGeographicLocation"
 _contact_geographic_location_verbose = humanize(
-        underscore(_contact_geographic_location))
+    underscore(_contact_geographic_location))
 
 
 class ContactGeographicLocation(ContactsModel):
@@ -751,7 +757,7 @@ class ContactNickname(ContactsModel):
     contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
     name = fields.foreign_key_field(Nickname, on_delete=CASCADE)
     nickname_type = fields.foreign_key_field(
-            NicknameType, null=True, blank=True)
+        NicknameType, null=True, blank=True)
 
     class Meta(ContactsModel.Meta):
         db_table = db_table(_app_label, _contact_nickname)
@@ -819,7 +825,7 @@ class ContactPhoto(ContactImage):
         db_table = db_table(_app_label, _contact_photo)
         verbose_name = _(_contact_photo_verbose)
         verbose_name_plural = _(pluralize(_contact_photo_verbose))
-        unique_together = ("contact", "image_reference",  "photo_type")
+        unique_together = ("contact", "image_reference", "photo_type")
 
 _contact_role = "ContactRole"
 _contact_role_verbose = humanize(underscore(_contact_role))
