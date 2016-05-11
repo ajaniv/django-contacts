@@ -17,7 +17,8 @@ from django_core_models.social_media.tests.factories import (EmailModelFactory,
                                                              FormattedNameModelFactory,
                                                              InstantMessagingModelFactory,
                                                              NicknameModelFactory,
-                                                             PhoneModelFactory)
+                                                             PhoneModelFactory,
+                                                             UrlModelFactory)
 from django_core_models.locations.tests.factories import (
     GeographicLocationModelFactory, LanguageModelFactory, TimezoneModelFactory,
     USAddressModelFactory)
@@ -277,3 +278,14 @@ class ContactTitleModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactTitle
+
+
+class ContactUrlModelFactory(ContactsModelFactory):
+    """ContactUrl association model factory class.
+    """
+    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    url = factory.SubFactory(UrlModelFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.ContactUrl

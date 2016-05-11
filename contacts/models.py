@@ -388,6 +388,17 @@ class ContactManager(VersionedModelManager):
         return delete_association(
             ContactTitle, contact=contact, title=title)
 
+    def url_add(self, contact, url, **kwargs):
+        """Add contact and url association."""
+        params = create_fields(contact, **kwargs)
+        return create_association(ContactUrl, contact=contact,
+                                  url=url, **params)
+
+    def url_remove(self, contact, url):
+        """Remove contact and url association."""
+        return delete_association(
+            ContactUrl, contact=contact, url=url)
+
 _contact = "Contact"
 _contact_verbose = humanize(underscore(_contact))
 

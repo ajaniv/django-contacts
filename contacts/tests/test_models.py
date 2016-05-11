@@ -15,7 +15,7 @@ from django_core_models.social_media.tests.factories import (
     InstantMessagingModelFactory, InstantMessagingTypeModelFactory,
     LogoTypeModelFactory, NameModelFactory,  NicknameTypeModelFactory,
     NicknameModelFactory, PhoneModelFactory, PhoneTypeModelFactory,
-    PhotoTypeModelFactory)
+    PhotoTypeModelFactory, UrlModelFactory, UrlTypeModelFactory)
 from django_core_models.demographics.tests.factories import (
     GenderModelFactory)
 from django_core_models.locations.tests.factories import (
@@ -330,6 +330,19 @@ class ContactTestCase(VersionedModelTestCase):
                         "ContactTitle creation error")
         self.assertEqual(contact.titles.count(), 1)
         ret = models.Contact.objects.title_remove(contact, title)
+        self.assertEqual(ret[0], 1)
+
+    def test_contact_url_add_remove(self):
+        contact = self.create_contact()
+        url = UrlModelFactory()
+        url_type = UrlTypeModelFactory()
+        contact_url = models.Contact.objects.url_add(
+            contact, url,
+            url_type=url_type)
+        self.assertTrue(contact_url,
+                        "ContactUrl creation error")
+        self.assertEqual(contact.urls.count(), 1)
+        ret = models.Contact.objects.url_remove(contact, url)
         self.assertEqual(ret[0], 1)
 
 
@@ -1009,5 +1022,37 @@ class ContactTitleTestCase(ContactAssociationTestCase):
         self.verify_contact_delete(self.factory_class)
 
     def test_title_delete(self):
+        self.verify_other_delete(
+            self.factory_class, self.attr_name)
+
+
+class ContactUrlTestCase(ContactAssociationTestCase):
+    """ContactUrl association model unit test class.
+    """
+    factory_class = factories.ContactUrlModelFactory
+    association_name = "urls"
+    other_class = models.Url
+    attr_name = "url"
+
+    def test_contact_url_crud(self):
+        self.verify_versioned_model_crud(
+            factory_class=self.factory_class)
+
+    def test_contact_url_access(self):
+        self.verify_access(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            attr_name=self.attr_name)
+
+    def test_contact_url_clear(self):
+        self.verify_clear(
+            factory_class=self.factory_class,
+            association_name=self.association_name,
+            other_class=self.other_class)
+
+    def test_contact_delete(self):
+        self.verify_contact_delete(self.factory_class)
+
+    def test_url_delete(self):
         self.verify_other_delete(
             self.factory_class, self.attr_name)
