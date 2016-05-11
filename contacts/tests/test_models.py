@@ -59,12 +59,12 @@ class ContactTestCase(VersionedModelTestCase):
     """
     def test_contact_crud_name(self):
         self.verify_versioned_model_crud(
-            factory_class=factories.ContactModelFactory,
-            name=NameModelFactory())
+            factory_class=factories.ContactModelFactory)
 
     def test_contact_crud_formatted_name(self):
         self.verify_versioned_model_crud(
             factory_class=factories.ContactModelFactory,
+            name=None,
             formatted_name=FormattedNameModelFactory())
 
     def test_contact_optional_fields(self):
@@ -621,10 +621,12 @@ class ContactNameTestCase(ContactAssociationTestCase):
             attr_name=self.attr_name)
 
     def test_contact_name_clear(self):
+        # an instance of name is created per contact factory use
         self.verify_clear(
             factory_class=self.factory_class,
             association_name=self.association_name,
-            other_class=self.other_class)
+            other_class=self.other_class,
+            expected_other_model_count=2)
 
     def test_contact_delete(self):
         self.verify_contact_delete(self.factory_class)

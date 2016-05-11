@@ -60,6 +60,8 @@ class ContactsModelFactory(VersionedModelFactory):
 class ContactModelFactory(ContactsModelFactory):
     """Contact model factory class.
     """
+    name = factory.SubFactory(NameModelFactory)
+
     class Meta(object):
         """Model meta class."""
         model = models.Contact
@@ -68,7 +70,7 @@ class ContactModelFactory(ContactsModelFactory):
 class ContactAddressModelFactory(ContactsModelFactory):
     """ContactAddress association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     address = factory.SubFactory(USAddressModelFactory)
 
     class Meta(object):
@@ -79,7 +81,7 @@ class ContactAddressModelFactory(ContactsModelFactory):
 class ContactAnnotationModelFactory(ContactsModelFactory):
     """ContactAnnotation association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     annotation = factory.SubFactory(AnnotationModelFactory)
 
     class Meta(object):
@@ -90,7 +92,7 @@ class ContactAnnotationModelFactory(ContactsModelFactory):
 class ContactCategoryModelFactory(ContactsModelFactory):
     """ContactCategory association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     category = factory.SubFactory(CategoryModelFactory)
 
     class Meta(object):
@@ -101,7 +103,7 @@ class ContactCategoryModelFactory(ContactsModelFactory):
 class ContactEmailModelFactory(ContactsModelFactory):
     """ContactEmail association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     email = factory.SubFactory(EmailModelFactory)
 
     class Meta(object):
@@ -112,7 +114,7 @@ class ContactEmailModelFactory(ContactsModelFactory):
 class ContactFormattedNameModelFactory(ContactsModelFactory):
     """ContactFormattedName association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     name = factory.SubFactory(FormattedNameModelFactory)
 
     class Meta(object):
@@ -123,7 +125,7 @@ class ContactFormattedNameModelFactory(ContactsModelFactory):
 class ContactGeographicLocationModelFactory(ContactsModelFactory):
     """ContactGroup association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     geographic_location = factory.SubFactory(GeographicLocationModelFactory)
 
     class Meta(object):
@@ -134,7 +136,7 @@ class ContactGeographicLocationModelFactory(ContactsModelFactory):
 class ContactGroupModelFactory(ContactsModelFactory):
     """ContactGroup association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     group = factory.SubFactory(GroupModelFactory)
 
     class Meta(object):
@@ -145,7 +147,7 @@ class ContactGroupModelFactory(ContactsModelFactory):
 class ContactInstantMessagingModelFactory(ContactsModelFactory):
     """ContactInstantMessaging association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     instant_messaging = factory.SubFactory(InstantMessagingModelFactory)
 
     class Meta(object):
@@ -156,7 +158,7 @@ class ContactInstantMessagingModelFactory(ContactsModelFactory):
 class ContactLanguageModelFactory(ContactsModelFactory):
     """ContactLanguage association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     language = factory.SubFactory(LanguageModelFactory)
 
     class Meta(object):
@@ -167,7 +169,7 @@ class ContactLanguageModelFactory(ContactsModelFactory):
 class ContactLogoModelFactory(ContactsModelFactory):
     """ContactLogo association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     image_reference = factory.SubFactory(ImageReferenceModelFactory)
 
     class Meta(object):
@@ -178,7 +180,7 @@ class ContactLogoModelFactory(ContactsModelFactory):
 class ContactNameModelFactory(ContactsModelFactory):
     """ContactName association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     name = factory.SubFactory(NameModelFactory)
 
     class Meta(object):
@@ -189,7 +191,7 @@ class ContactNameModelFactory(ContactsModelFactory):
 class ContactNicknameModelFactory(ContactsModelFactory):
     """ContactNickname association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     name = factory.SubFactory(NicknameModelFactory)
 
     class Meta(object):
@@ -200,7 +202,7 @@ class ContactNicknameModelFactory(ContactsModelFactory):
 class ContactOrganizationModelFactory(ContactsModelFactory):
     """ContactOrganization association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     organization = factory.SubFactory(OrganizationModelFactory)
 
     class Meta(object):
@@ -211,7 +213,7 @@ class ContactOrganizationModelFactory(ContactsModelFactory):
 class ContactPhoneModelFactory(ContactsModelFactory):
     """ContactPhone association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     phone = factory.SubFactory(PhoneModelFactory)
 
     class Meta(object):
@@ -222,7 +224,7 @@ class ContactPhoneModelFactory(ContactsModelFactory):
 class ContactPhotoModelFactory(ContactsModelFactory):
     """ContactPhoto association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     image_reference = factory.SubFactory(ImageReferenceModelFactory)
 
     class Meta(object):
@@ -233,10 +235,8 @@ class ContactPhotoModelFactory(ContactsModelFactory):
 class RelatedContactModelFactory(ContactsModelFactory):
     """RelatedContact association model factory class.
     """
-    from_contact = factory.SubFactory(
-        ContactModelFactory, name=NameModelFactory())
-    to_contact = factory.SubFactory(
-        ContactModelFactory, name=NameModelFactory())
+    from_contact = factory.SubFactory(ContactModelFactory)
+    to_contact = factory.SubFactory(ContactModelFactory)
     contract_relationship_type = factory.SubFactory(
         ContactRelationshipTypeModelFactory)
 
@@ -248,7 +248,7 @@ class RelatedContactModelFactory(ContactsModelFactory):
 class ContactRoleModelFactory(ContactsModelFactory):
     """ContactRole association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     role = factory.SubFactory(RoleModelFactory)
 
     class Meta(object):
@@ -259,7 +259,7 @@ class ContactRoleModelFactory(ContactsModelFactory):
 class ContactTimezoneModelFactory(ContactsModelFactory):
     """ContactTimezone association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     timezone = factory.SubFactory(TimezoneModelFactory)
 
     class Meta(object):
@@ -270,7 +270,7 @@ class ContactTimezoneModelFactory(ContactsModelFactory):
 class ContactTitleModelFactory(ContactsModelFactory):
     """ContactTitle association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     title = factory.SubFactory(TitleModelFactory)
 
     class Meta(object):
@@ -281,7 +281,7 @@ class ContactTitleModelFactory(ContactsModelFactory):
 class ContactUrlModelFactory(ContactsModelFactory):
     """ContactUrl association model factory class.
     """
-    contact = factory.SubFactory(ContactModelFactory, name=NameModelFactory())
+    contact = factory.SubFactory(ContactModelFactory)
     url = factory.SubFactory(UrlModelFactory)
 
     class Meta(object):
