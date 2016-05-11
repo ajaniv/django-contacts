@@ -53,8 +53,8 @@ Connected contacts
 Build Status
 ------------
 
-.. image:: https://travis-ci.org/ajaniv/django-core-models.svg?branch=master
-    :target: https://travis-ci.org/ajaniv/django-core-models
+.. image:: https://travis-ci.org/ajaniv/django-contacts.svg?branch=master
+    :target: https://travis-ci.org/ajaniv/django-contacts
 
 Attributes
 ----------
