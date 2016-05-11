@@ -1,0 +1,2 @@
+#Docker common environment file
+DJANGO_SECRET_KEY='ubd(v=i$@^plvy!-yyo*&@xi!y0514r4wkjp49k+e@r&*)7u-_'

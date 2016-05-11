@@ -1,0 +1,8 @@
+#Docker mysql environment file
+DB_ENGINE=mysql
+MYSQL_NAME=django_core_utils
+MYSQL_USER=mysql
+MYSQL_PASSWORD=mysql
+MYSQL_HOST=db-mysql
+MYSQL_PORT=3306
+MYSQL_ROOT_PASSWORD=rootpassword
