@@ -1,8 +1,8 @@
 """
-.. module::  django_contacts.apps
+.. module::  contacts.apps
    :synopsis:  Django contacts application configuration  module.
 
-Django demographics application configuration  module.
+Django contacts application configuration  module.
 
 """
 from django.apps import AppConfig
@@ -13,3 +13,6 @@ class ContactsConfig(AppConfig):
     """Django's  contacts application configuration class."""
     name = __package__
     verbose_name = _("Contacts")
+
+    def ready(self):
+        import contacts.signals  # noqa @UnusedImport

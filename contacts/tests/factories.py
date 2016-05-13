@@ -24,7 +24,7 @@ from django_core_models.social_media.tests.factories import (
     NameModelFactory, NicknameModelFactory,
     PhoneModelFactory, UrlModelFactory)
 from django_core_utils.tests.factories import (
-    NamedModelFactory, VersionedModelFactory)
+    NamedModelFactory, VersionedModelFactory, UserFactory)
 
 from .. import models
 
@@ -287,3 +287,13 @@ class ContactUrlModelFactory(ContactsModelFactory):
     class Meta(object):
         """Model meta class."""
         model = models.ContactUrl
+
+
+class UserProfileModelFactory(factory.DjangoModelFactory):
+    """UserProfile  model factory class.
+    """
+    user = factory.SubFactory(UserFactory)
+
+    class Meta(object):
+        """Model meta class."""
+        model = models.UserProfile

@@ -7,6 +7,13 @@
 from __future__ import absolute_import, print_function
 
 from django.utils import timezone
+from django.conf import settings
+
+from python_core_utils.core import class_name
+from django_core_utils.tests.factories import GroupFactory
+from django_core_utils.tests.test_utils import (BaseModelTestCase,
+                                                NamedModelTestCase,
+                                                VersionedModelTestCase)
 
 from django_core_models.demographics.tests.factories import GenderModelFactory
 from django_core_models.images.tests.factories import (
@@ -26,15 +33,47 @@ from django_core_models.social_media.tests.factories import (
     NicknameTypeModelFactory, PhoneModelFactory,
     PhoneTypeModelFactory, PhotoTypeModelFactory,
     UrlModelFactory, UrlTypeModelFactory)
-from django_core_utils.tests.test_utils import (NamedModelTestCase,
-                                                VersionedModelTestCase)
-from python_core_utils.core import class_name
+
 
 from . import factories
+
 from .. import models
 
 
-class ContactTypeTestCase(NamedModelTestCase):
+class PermissionsMixin(object):
+    """Permission unit test mixin class."""
+    def setUp(self):
+        self.saved_setting = settings.USE_OBJECT_PERMISSIONS
+        settings.USE_OBJECT_PERMISSIONS = False
+
+    def tearDown(self):
+        settings.USE_OBJECT_PERMISSIONS = self.saved_setting
+
+
+class ContactsNamedModelTestCase(PermissionsMixin, NamedModelTestCase):
+    """Named model helper unit test class."""
+    def setUp(self):
+        PermissionsMixin.setUp(self)
+        NamedModelTestCase.setUp(self)
+
+    def tearDown(self):
+        NamedModelTestCase.tearDown(self)
+        PermissionsMixin.tearDown(self)
+
+
+class ContactsVersionedModelTestCase(PermissionsMixin, VersionedModelTestCase):
+    """Versioned model helper unit test class."""
+
+    def setUp(self):
+        PermissionsMixin.setUp(self)
+        VersionedModelTestCase.setUp(self)
+
+    def tearDown(self):
+        VersionedModelTestCase.tearDown(self)
+        PermissionsMixin.tearDown(self)
+
+
+class ContactTypeTestCase(ContactsNamedModelTestCase):
     """ContactType model unit test class.
     """
     def test_contact_type_crud(self):
@@ -44,7 +83,7 @@ class ContactTypeTestCase(NamedModelTestCase):
             get_by_name="name_1")
 
 
-class ContactRelationshipTypeTestCase(NamedModelTestCase):
+class ContactRelationshipTypeTestCase(ContactsNamedModelTestCase):
     """ContactRelationship model unit test class.
     """
     def test_contract_relationship_type_crud(self):
@@ -54,7 +93,7 @@ class ContactRelationshipTypeTestCase(NamedModelTestCase):
             get_by_name="name_1")
 
 
-class ContactTestCase(VersionedModelTestCase):
+class ContactTestCase(ContactsVersionedModelTestCase):
     """Contact model unit test class.
     """
     def test_contact_crud_name(self):
@@ -77,7 +116,7 @@ class ContactTestCase(VersionedModelTestCase):
         instance.clean()
 
 
-class ContactAssociationTestCase(VersionedModelTestCase):
+class ContactAssociationTestCase(ContactsVersionedModelTestCase):
     """Base class for contact association test cases."""
 
     def create_contact(self, **kwargs):
@@ -1065,3 +1104,73 @@ class ContactUrlTestCase(ContactAssociationTestCase):
         self.assertEqual(contact.urls.count(), 1)
         ret = models.Contact.objects.url_remove(contact, url)
         self.assertEqual(ret[0], 1)
+
+
+class UserProfileTestCase(PermissionsMixin, BaseModelTestCase):
+    """UserProfile model unit test class.
+    """
+    def setUp(self):
+        PermissionsMixin.setUp(self)
+        BaseModelTestCase.setUp(self)
+
+    def tearDown(self):
+        BaseModelTestCase.tearDown(self)
+        PermissionsMixin.tearDown(self)
+
+    def create_user_profile(self, **kwargs):
+        instance = factories.UserProfileModelFactory(**kwargs)
+        instance.clean()
+        return instance
+
+    def verify_relation(self, attrs, other):
+        profile = self.create_user_profile()
+        for attr in attrs:
+            relation = getattr(profile, attr)
+            self.assertEqual(relation.count(), 0)
+            relation.add(other)
+            self.assertEqual(relation.count(), 1)
+            relation.remove(other)
+            self.assertEqual(relation.count(), 0)
+
+    def test_user_profile_crud(self):
+        instance = self.create_user_profile()
+        self.assertEqual(models.UserProfile.objects.count(), 1)
+        instance.full_clean()
+        instance.save()
+        saved = models.UserProfile.objects.get(pk=instance.id)
+        self.assertEqual(instance, saved)
+        saved.delete()
+        self.assertEqual(models.UserProfile.objects.count(), 0)
+
+    def test_user_profile_add_remove_user(self):
+        self.verify_relation(("users_read", "users_write"),
+                             factories.UserFactory())
+
+    def test_user_profile_add_remove_groups(self):
+        self.verify_relation(("groups_read", "groups_write"),
+                             GroupFactory())
+
+    def test_user_profile_delete_user(self):
+        profile = self.create_user_profile()
+        self.assertEqual(models.UserProfile.objects.count(), 1)
+        self.assertEqual(profile.users_read.count(), 0)
+        # 1. Verify when a user is deleted, the relationship is removed
+        user = factories.UserFactory()
+        profile.users_read.add(user)
+        self.assertEqual(profile.users_read.count(), 1)
+        user.delete()
+        self.assertEqual(profile.users_read.count(), 0)
+        # 2. Verify when a user is deleted associated profile is deleted
+        profile.user.delete()
+        self.assertEqual(models.UserProfile.objects.count(), 0)
+
+    def test_user_profile_delete_group(self):
+        profile = self.create_user_profile()
+        self.assertEqual(models.UserProfile.objects.count(), 1)
+        self.assertEqual(profile.groups_read.count(), 0)
+        # Verify when a group is deleted, the relationship is removed
+        group = GroupFactory()
+        profile.groups_read.add(group)
+        self.assertEqual(profile.groups_read.count(), 1)
+        group.delete()
+        self.assertEqual(profile.groups_read.count(), 0)
