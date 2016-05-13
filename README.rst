@@ -20,8 +20,8 @@ are also executed under Django 1.8.
 
 Detailed documentation may be found in the "docs" directory.
 
-Contact ownership
------------------
+Contact ownership/permissions
+-----------------------------
 * Private contact is one that only its  creator can update and read.  Creator can designate users, user groups as being able to have read or read/write access
 * Shared contact is one to which several user, user groups have read or read/write access
 * Contact permission is a relationship:
@@ -29,6 +29,8 @@ Contact ownership
 	- contact ->user
 	- contact->user group
 	- contact->permissions(read/write)
+	
+The underlying implementation of permissions at the contact level is using `django-guardian`_.
 
 Individual using shared site
 ----------------------------
@@ -187,3 +189,4 @@ To do
 .. _django-core-utils: https://github.com/ajaniv/django-core-utils/
 .. _django-core-models: https://github.com/ajaniv/django-core-models/
 .. _python-core-utils: https://github.com/ajaniv/python-core-utils/
+.. _django-guardian:  https://github.com/django-guardian/django-guardian/

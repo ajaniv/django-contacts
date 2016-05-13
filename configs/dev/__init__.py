@@ -10,6 +10,7 @@ from configs.common.root import *  # @UnusedWildImport
 from configs.common.django import *  # @UnusedWildImport
 from configs.common.log import *  # @UnusedWildImport
 from configs.common.database import *  # @UnusedWildImport
+from configs.common.permissions import *  # @UnusedWildImport
 from configs.common.rest_framework import *  # @UnusedWildImport
 
 # @TODO: revisit usage of django_extensions only in dev

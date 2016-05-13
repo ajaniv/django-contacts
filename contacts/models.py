@@ -1,5 +1,5 @@
 """
-.. module::  contact.models
+.. module::  contacts.models
    :synopsis:  Contact models module.
 
 Contact models module.  A primary design decision was to be inspired by key
@@ -48,10 +48,17 @@ from __future__ import absolute_import
 # @TODO: review class field layout
 # @TODO: review each of the types, determine which should be optional
 import logging
+from inflection import humanize, pluralize, underscore
 
+from django.conf import settings
+import django.contrib.auth.models
+from django.db.models import Model
 from django.db.models import CASCADE
 from django.utils.translation import ugettext_lazy as _
-from inflection import humanize, pluralize, underscore
+
+from guardian.models import UserObjectPermissionBase
+from guardian.models import GroupObjectPermissionBase
+
 
 from python_core_utils.core import class_name
 from django_core_utils import fields
@@ -78,7 +85,7 @@ from django_core_models.social_media.models import (Email, EmailType,
 
 from django_core_utils.models import (NamedModel, PrioritizedModel,
                                       VersionedModel, VersionedModelManager,
-                                      db_table)
+                                      db_table, related_name_base)
 
 
 from . import validation
@@ -452,7 +459,7 @@ class Contact(ContactsModel):
     languages = fields.many_to_many_field(Language, through="ContactLanguage")
     logos = fields.many_to_many_field(
         ImageReference, through="ContactLogo",
-        related_name="%(app_label)s_%(class)s_related_contact_logo")
+        related_name=related_name_base + "contact_logo")
     names = fields.many_to_many_field(Name, through="ContactName")
     nicknames = fields.many_to_many_field(Nickname,
                                           through="ContactNickname")
@@ -462,7 +469,7 @@ class Contact(ContactsModel):
                                        through="ContactPhone")
     photos = fields.many_to_many_field(
         ImageReference, through="ContactPhoto",
-        related_name="%(app_label)s_%(class)s_related_contact_photo")
+        related_name=related_name_base + "contact_photo")
     related_contacts = fields.many_to_many_field(
         "self", through="RelatedContact", symmetrical=False)
     roles = fields.many_to_many_field(Role, through="ContactRole")
@@ -476,6 +483,10 @@ class Contact(ContactsModel):
         db_table = db_table(_app_label, _contact)
         verbose_name = _(_contact_verbose)
         verbose_name_plural = _(pluralize(_contact_verbose))
+        permissions = (
+            ("read_contact", "Can read contacts"),
+            ("write_contact", "Can write contacts"),
+        )
 
     def clean(self):
         super(Contact, self).clean()
@@ -950,3 +961,68 @@ class RelatedContact(ContactsModel):
         verbose_name_plural = _(pluralize(_related_contact_verbose))
         unique_together = ("from_contact", "to_contact",
                            "contract_relationship_type")
+
+
+PERMISSION_ADD = "contacts.add_contact"
+PERMISSION_CHANGE = "contacts.change_contact"
+PERMISSION_DELETE = "contacts.delete_contact"
+PERMISSION_READ = "contacts.read_contact"
+PERMISSION_WRITE = "contacts.write_contact"
+PERMISSIONS_CONTACT_OBJECT = (PERMISSION_READ, PERMISSION_WRITE)
+PERMISSIONS_CONTACT_FUNCTIONAL = (PERMISSION_ADD,
+                                  PERMISSION_CHANGE,
+                                  PERMISSION_DELETE)
+
+# As per guardian documentation, defining these derived classes
+# with physical foreign key definitions results in improved performance.
+# The on_delete parameter is defined such that on contact instance deletion
+# the associated object permissions are deleted as well.
+
+
+class ContactObjectPermission(UserObjectPermissionBase):
+    """User contact permission class."""
+    content_object = fields.foreign_key_field(Contact, on_delete=CASCADE)
+
+
+class ContactGroupObjectPermission(GroupObjectPermissionBase):
+    """Group contact permission class."""
+    content_object = fields.foreign_key_field(Contact, on_delete=CASCADE)
+
+_contacts_user_profile = "UserProfile"
+_contacts_user_profile_verbose = humanize(underscore(_contacts_user_profile))
+_groups_read = "groups_read"
+_groups_write = "groups_write"
+_users_read = "users_read"
+_users_write = "users_write"
+
+
+def _field_helper(to_class, relation_type):
+    return fields.many_to_many_field(
+        to_class=to_class,
+        db_table="{}_{}".format(
+            db_table(_app_label, _contacts_user_profile), relation_type),
+        related_name=related_name_base + relation_type)
+
+
+class UserProfile(Model):
+    """Contacts application user profile model class.
+
+    Each user has an associated ContactsUserProfile instance which defines
+    which users and groups are granted read/write access permissions
+    for contacts created by the user.
+    """
+    user = fields.one_to_one_field(settings.AUTH_USER_MODEL,
+                                   on_delete=CASCADE)
+    groups_read = _field_helper(
+        django.contrib.auth.models.Group, _groups_read)
+    groups_write = _field_helper(
+        django.contrib.auth.models.Group, _groups_write)
+    users_read = _field_helper(
+        django.contrib.auth.models.User, _users_read)
+    users_write = _field_helper(
+        django.contrib.auth.models.User, _users_write)
+
+    class Meta(ContactsModel.Meta):
+        db_table = db_table(_app_label, _contacts_user_profile)
+        verbose_name = _(_contacts_user_profile_verbose)
+        verbose_name_plural = _(pluralize(_contacts_user_profile_verbose))

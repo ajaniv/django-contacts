@@ -17,8 +17,8 @@ It was developed using Django 1.9.4 for python 2.7, python 3.5, sqlite, MySql an
 
 Detailed documentation may be found in the "docs" directory.
 
-Contact ownership
------------------
+Contact ownership/permissions
+-----------------------------
 
 -   Private contact is one that only its creator can update and read. Creator can designate users, user groups as being able to have read or read/write access
 -   Shared contact is one to which several user, user groups have read or read/write access
@@ -27,6 +27,8 @@ Contact ownership
     > -   contact -&gt;user
     > -   contact-&gt;user group
     > -   contact-&gt;permissions(read/write)
+
+The underlying implementation of permissions at the contact level is using [django-guardian](https://github.com/django-guardian/django-guardian/).
 
 Individual using shared site
 ----------------------------
