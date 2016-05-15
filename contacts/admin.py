@@ -180,6 +180,117 @@ class NameInline(ContactsInline):
          {"fields": _name_fields}),
     )
 
+_nickname_fields = (
+    _contacts_inline_fields + ("name", "nickname_type"),)
+
+
+class NicknameInline(ContactsInline):
+    model = models.ContactNickname
+    form = forms.ContactNicknameAdminForm
+    fieldsets = (
+        ("Contact nickname",
+         {"fields": _nickname_fields}),
+    )
+
+_organization_fields = (
+    _contacts_inline_fields + ("organization", "unit"),)
+
+
+class OrganizationInline(ContactsInline):
+    model = models.ContactOrganization
+    form = forms.ContactOrganizationAdminForm
+    fieldsets = (
+        ("Contact organization",
+         {"fields": _organization_fields}),
+    )
+
+_phone_fields = (
+    _contacts_inline_fields + ("phone", "phone_type"),)
+
+
+class PhoneInline(ContactsInline):
+    model = models.ContactPhone
+    form = forms.ContactPhoneAdminForm
+    fieldsets = (
+        ("Contact phone",
+         {"fields": _phone_fields}),
+    )
+
+_photo_fields = (
+    _contacts_inline_fields + ("image_reference", "photo_type"),)
+
+
+class PhotoInline(ContactsInline):
+    model = models.ContactPhoto
+    form = forms.ContactPhotoAdminForm
+    fieldsets = (
+        ("Contact photo",
+         {"fields": _photo_fields}),
+    )
+
+_role_fields = (
+    _contacts_inline_fields + ("role", "organization"),)
+
+
+class RoleInline(ContactsInline):
+    model = models.ContactRole
+    form = forms.ContactRoleAdminForm
+    fieldsets = (
+        ("Contact role",
+         {"fields": _role_fields}),
+    )
+
+_timezone_fields = (
+    _contacts_inline_fields + ("timezone", "timezone_type"),)
+
+
+class TimezoneInline(ContactsInline):
+    model = models.ContactTimezone
+    form = forms.ContactTimezoneAdminForm
+    fieldsets = (
+        ("Contact timezone",
+         {"fields": _timezone_fields}),
+    )
+
+_title_fields = (
+    _contacts_inline_fields + ("title", ),)
+
+
+class TitleInline(ContactsInline):
+    model = models.ContactTitle
+    form = forms.ContactTitleAdminForm
+    fieldsets = (
+        ("Contact title",
+         {"fields": _title_fields}),
+    )
+
+_url_fields = (
+    _contacts_inline_fields + ("url", "url_type"),)
+
+
+class UrlInline(ContactsInline):
+    model = models.ContactUrl
+    form = forms.ContactUrlAdminForm
+    fieldsets = (
+        ("Contact url",
+         {"fields": _url_fields}),
+    )
+
+
+_related_contact_fields = (
+    _contacts_inline_fields + (
+        "from_contact", "to_contact", "contact_relationship_type"),)
+
+
+class RelatedContactInline(ContactsInline):
+    model = models.RelatedContact
+    form = forms.RelatedContactAdminForm
+    fk_name = "from_contact"
+    fieldsets = (
+        ("Related contact",
+         {"fields": _related_contact_fields}),
+    )
+
 CONTACT_NAME_SIZE = 60
 
 _contact_fields = (
@@ -200,7 +311,10 @@ class ContactAdmin(PrioritizedModelAdmin):
         AddressInline, AnnotationInline, CategoryInline, EmailInline,
         FormattedNameInline, GeographicLocationInline, GroupInline,
         InstantMessagingInline, LanguageInline, LogoInline,
-        NameInline)
+        NameInline, NicknameInline, OrganizationInline,
+        PhoneInline, PhotoInline, RoleInline,
+        TimezoneInline, TitleInline,
+        UrlInline, RelatedContactInline)
 
     form = forms.ContactAdminForm
     list_display = ("id", "name", "formatted_name", "priority", "contact_type",
@@ -220,6 +334,20 @@ class ContactAdmin(PrioritizedModelAdmin):
         super(ContactAdmin, self).save_formset(request, form, formset, change)
 
 
+class UserProfileAdmin(admin.ModelAdmin):
+    """Versioned model admin class.
+    """
+    form = forms.UserProfileAdminForm
+    list_display = ("id", "get_username")
+    list_filter = ("user__username",)
+
+    ordering = ("id",)
+
+    def get_username(self, instance):
+        """return username ."""
+        return instance.user.username
+    get_username.short_description = "username"
+
 _named_classes = (models.ContactType,
                   models.ContactRelationshipType,
                   )
@@ -230,8 +358,8 @@ for clasz in _named_classes:
         (NamedModelAdmin,),
         named_model_admin_class_attrs(class_name(clasz)))
 
-_other_model_classes = (models.Contact, )
-_other_admin_classes = (ContactAdmin, )
+_other_model_classes = (models.Contact, models.UserProfile)
+_other_admin_classes = (ContactAdmin, UserProfileAdmin)
 
 for model_class, admin_class in zip(_other_model_classes,
                                     _other_admin_classes):

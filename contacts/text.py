@@ -167,3 +167,111 @@ contact_name_labels = {
 contact_name_help_texts = {
     "name": _("Name."),
     }
+
+contact_nickname_labels = {
+    "name": _("Name"),
+    "nickname_type": _("Nickname type"),
+    }
+
+contact_nickname_help_texts = {
+    "name": _("Name."),
+    "nickname_type": _("Nickname type."),
+    }
+
+contact_organization_labels = {
+    "organization": _("Organization"),
+    "unit": _("Unit"),
+    }
+
+contact_organization_help_texts = {
+    "organization": _("Organization."),
+    "unit": _("Organization unit."),
+    }
+
+contact_phone_labels = {
+    "phone": _("Phone"),
+    "phone_type": _("Phone type"),
+    }
+
+contact_phone_help_texts = {
+    "phone": _("Phone."),
+    "phone type": _("Phone type."),
+    }
+
+contact_photo_labels = {
+    "image_reference": _("Image reference"),
+    "photo_type": _("Photo type"),
+    }
+
+contact_photo_help_texts = {
+    "image_reference": _("Image reference."),
+    "photo_type": _("Photo type."),
+    }
+
+contact_role_labels = {
+    "role": _("Role"),
+    "organization": _("Organization"),
+    }
+
+contact_role_help_texts = {
+    "role": _("Role."),
+    "organization": _("Organization."),
+    }
+
+contact_timezone_labels = {
+    "timezone": _("Timezone"),
+    "timezone_type": _("Timezone type"),
+    }
+
+contact_timezone_help_texts = {
+    "timezone": _("Timezone."),
+    "timezone_type": _("Timezone type."),
+    }
+
+contact_title_labels = {
+    "title": _("Title"),
+    "organization": _("Organization"),
+    }
+
+contact_title_help_texts = {
+    "title": _("Title."),
+    "organization": _("Organization."),
+    }
+
+contact_url_labels = {
+    "url": _("Url"),
+    "url_type": _("Url type"),
+    }
+
+contact_url_help_texts = {
+    "url": _("Url."),
+    "url_type": _("Url type."),
+    }
+
+related_contact_labels = {
+    "from_contact": _("From contact"),
+    "to_contact": _("To contact"),
+    "contract_relationship_type": _("Relationship Type"),
+    }
+
+related_contact_help_texts = {
+    "from_contact": _("From contact."),
+    "to_contact": _("To contact."),
+    "contact_relationship_type": _("Relationship Type."),
+    }
+
+user_profile_labels = {
+    "user": _("User"),
+    "groups_read": _("Groups read"),
+    "groups_write": _("Groups write"),
+    "users_read": _("Users read"),
+    "users_write": _("Users write"),
+    }
+
+user_profile_help_texts = {
+    "user": _("User."),
+    "groups_read": _("Groups read."),
+    "groups_write": _("Groups write."),
+    "users_read": _("Users read."),
+    "users_write": _("Users write."),
+    }

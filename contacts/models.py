@@ -496,6 +496,9 @@ class Contact(ContactsModel):
     def display_name(self):
         return self.name if self.name else self.formatted_name
 
+    def __str__(self):
+        return str(self.display_name)
+
 
 class ContactAssociation(ContactsModel):
     """Base class for contact association."""
@@ -969,7 +972,7 @@ class RelatedContact(ContactAssociation):
         Contact,
         on_delete=CASCADE,
         related_name="%(app_label)s_%(class)s_related_to_contact")
-    contract_relationship_type = fields.foreign_key_field(
+    contact_relationship_type = fields.foreign_key_field(
         ContactRelationshipType)
 
     class Meta(ContactAssociation.Meta):
@@ -977,7 +980,11 @@ class RelatedContact(ContactAssociation):
         verbose_name = _(_related_contact_verbose)
         verbose_name_plural = _(pluralize(_related_contact_verbose))
         unique_together = ("from_contact", "to_contact",
-                           "contract_relationship_type")
+                           "contact_relationship_type")
+
+    def clean(self):
+        super(RelatedContact, self).clean()
+        validation.related_contact_validation(self)
 
 
 PERMISSION_ADD = "contacts.add_contact"

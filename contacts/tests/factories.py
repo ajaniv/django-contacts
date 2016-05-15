@@ -237,7 +237,7 @@ class RelatedContactModelFactory(ContactsModelFactory):
     """
     from_contact = factory.SubFactory(ContactModelFactory)
     to_contact = factory.SubFactory(ContactModelFactory)
-    contract_relationship_type = factory.SubFactory(
+    contact_relationship_type = factory.SubFactory(
         ContactRelationshipTypeModelFactory)
 
     class Meta(object):

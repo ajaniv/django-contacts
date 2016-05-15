@@ -17,6 +17,9 @@ def contact_validation(contact):
     if contact.name is None and contact.formatted_name is None:
         raise ValidationError(_("Name and formatted_name are none."))
 
+    if contact.pk is None:
+        return
+
     if (contact.name and
             contact.names.filter(
                 id=contact.name.id).exists()):
@@ -48,4 +51,11 @@ def contact_name_validation(association):
     """Validate ContactName."""
     if association.name == association.contact.name:
         msg = "Contact has foreign key association to name."
+        raise ValidationError(_(msg))
+
+
+def related_contact_validation(association):
+    """Validate RelatedConct."""
+    if association.from_contact == association.to_contact:
+        msg = "Contact cannot be associated to itself."
         raise ValidationError(_(msg))
