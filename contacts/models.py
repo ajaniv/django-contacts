@@ -84,7 +84,7 @@ from django_core_models.social_media.models import (Email, EmailType,
                                                     UrlType)
 
 from django_core_utils.models import (NamedModel, PrioritizedModel,
-                                      VersionedModel, VersionedModelManager,
+                                      VersionedModelManager,
                                       db_table, related_name_base)
 
 
@@ -165,9 +165,9 @@ class ContactRelationshipType(NamedModel):
         verbose_name_plural = _(pluralize(_related_contact_type_verbose))
 
 
-class ContactsModel(VersionedModel, PrioritizedModel):
+class ContactsModel(PrioritizedModel):
     """Base contacts class."""
-    class Meta(VersionedModel.Meta):
+    class Meta(PrioritizedModel.Meta):
         """Model meta class declaration."""
         app_label = _app_label
         abstract = True
@@ -490,13 +490,26 @@ class Contact(ContactsModel):
 
     def clean(self):
         super(Contact, self).clean()
-        validation.name_validation(self.name, self.formatted_name)
+        validation.contact_validation(self)
+
+    @property
+    def display_name(self):
+        return self.name if self.name else self.formatted_name
+
+    def __str__(self):
+        return str(self.display_name)
+
+
+class ContactAssociation(ContactsModel):
+    """Base class for contact association."""
+    class Meta(ContactsModel.Meta):
+        abstract = True
 
 _contact_address = "ContactAddress"
 _contact_address_verbose = humanize(underscore(_contact_address))
 
 
-class ContactAddress(ContactsModel):
+class ContactAddress(ContactAssociation):
     """Contact address model class.
 
     Capture the attributes of contact address(s).
@@ -507,7 +520,7 @@ class ContactAddress(ContactsModel):
     address = fields.foreign_key_field(Address, on_delete=CASCADE)
     address_type = fields.foreign_key_field(AddressType, null=True, blank=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_address)
         verbose_name = _(_contact_address_verbose)
         verbose_name_plural = _(pluralize(_contact_address_verbose))
@@ -518,7 +531,7 @@ _contact_annotation = "ContactAnnotation"
 _contact_annotation_verbose = humanize(underscore(_contact_annotation))
 
 
-class ContactAnnotation(ContactsModel):
+class ContactAnnotation(ContactAssociation):
     """Contact annotation model class.
 
     Capture contact annotation/notes attributes.  A contact may be associated
@@ -528,7 +541,7 @@ class ContactAnnotation(ContactsModel):
     contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
     annotation = fields.foreign_key_field(Annotation, on_delete=CASCADE)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_annotation)
         verbose_name = _(_contact_annotation_verbose)
         verbose_name_plural = _(pluralize(_contact_annotation_verbose))
@@ -538,14 +551,14 @@ _contact_category = "ContactCategory"
 _contact_category_verbose = humanize(underscore(_contact_category))
 
 
-class ContactCategory(ContactsModel):
+class ContactCategory(ContactAssociation):
     """Contact category model class.
 
     Capture contact category attributes.  A contact may be associated
     with 0 or more contact categories:
         Contact(1) ------> Category(0..*)
     """
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_category)
         verbose_name = _(_contact_category_verbose)
         verbose_name_plural = _(pluralize(_contact_category_verbose))
@@ -558,7 +571,7 @@ _contact_email = "ContactEmail"
 _contact_email_verbose = humanize(underscore(_contact_email))
 
 
-class ContactEmail(ContactsModel):
+class ContactEmail(ContactAssociation):
     """Contact email address model class.
 
     Captures contact email address(s).  Contact may be associated with
@@ -569,7 +582,7 @@ class ContactEmail(ContactsModel):
     email = fields.foreign_key_field(Email, on_delete=CASCADE)
     email_type = fields.foreign_key_field(EmailType, null=True, blank=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_email)
         verbose_name = _(_contact_email_verbose)
         verbose_name_plural = _(pluralize(_contact_email_verbose))
@@ -579,7 +592,7 @@ _formatted_name = "FormattedName"
 _formatted_name_verbose = humanize(underscore(_formatted_name))
 
 
-class ContactFormattedName(ContactsModel):
+class ContactFormattedName(ContactAssociation):
     """Contact formatted name model class.
 
     Specifies the formatted contact name.
@@ -590,18 +603,22 @@ class ContactFormattedName(ContactsModel):
     contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
     name = fields.foreign_key_field(FormattedName, on_delete=CASCADE)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _formatted_name)
         verbose_name = _(_formatted_name_verbose)
         verbose_name_plural = _(pluralize(_formatted_name_verbose))
         unique_together = ('contact', 'name')
+
+    def clean(self):
+        super(ContactFormattedName, self).clean()
+        validation.contact_formatted_name_validation(self)
 
 _contact_geographic_location = "ContactGeographicLocation"
 _contact_geographic_location_verbose = humanize(
     underscore(_contact_geographic_location))
 
 
-class ContactGeographicLocation(ContactsModel):
+class ContactGeographicLocation(ContactAssociation):
     """
     Contact geographic location model class.
 
@@ -615,7 +632,7 @@ class ContactGeographicLocation(ContactsModel):
     geographic_location_type = fields.foreign_key_field(
         GeographicLocationType, blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_geographic_location)
         verbose_name = _(_contact_geographic_location_verbose)
         verbose_name_plural = _(
@@ -628,7 +645,7 @@ _contact_group = "ContactGroup"
 _contact_group_verbose = humanize(underscore(_contact_group))
 
 
-class ContactGroup(ContactsModel):
+class ContactGroup(ContactAssociation):
     """ContactGroup model class.
 
     Capture contact group attributes.  A contact may be associated
@@ -638,14 +655,14 @@ class ContactGroup(ContactsModel):
     contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
     group = fields.foreign_key_field(Group, on_delete=CASCADE)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_group)
         verbose_name = _(_contact_group_verbose)
         verbose_name_plural = _(pluralize(_contact_group_verbose))
         unique_together = ("contact", "group")
 
 
-class ContactImage(ContactsModel):
+class ContactImage(ContactAssociation):
     """Contact image abstract model base class.
 
     Capture contact  photograph information.
@@ -660,7 +677,7 @@ class ContactImage(ContactsModel):
     image_reference = fields.foreign_key_field(ImageReference,
                                                on_delete=CASCADE)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         abstract = True
 
 
@@ -669,7 +686,7 @@ _contact_instant_messaging_verbose = humanize(
     underscore(_contact_instant_messaging))
 
 
-class ContactInstantMessaging(ContactsModel):
+class ContactInstantMessaging(ContactAssociation):
     """Contact instant messaging model class.
 
     Capture the URI(s) for contact instant messaging.
@@ -682,7 +699,7 @@ class ContactInstantMessaging(ContactsModel):
     instant_messaging_type = fields.foreign_key_field(InstantMessagingType,
                                                       blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_instant_messaging)
         verbose_name = _(_contact_instant_messaging_verbose)
         verbose_name_plural = _(pluralize(_contact_instant_messaging_verbose))
@@ -695,7 +712,7 @@ _contact_language = "ContactLanguage"
 _contact_language_verbose = humanize(underscore(_contact_language))
 
 
-class ContactLanguage(ContactsModel):
+class ContactLanguage(ContactAssociation):
     """Contact language model class.
 
     Specify the language(s) that may be used for communicating with
@@ -707,7 +724,7 @@ class ContactLanguage(ContactsModel):
     language_type = fields.foreign_key_field(
         LanguageType, blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_language)
         verbose_name = _(_contact_language_verbose)
         verbose_name_plural = _(pluralize(_contact_language_verbose))
@@ -736,7 +753,7 @@ _contact_name = "ContactName"
 _contact_name_verbose = humanize(underscore(_contact_name))
 
 
-class ContactName(ContactsModel):
+class ContactName(ContactAssociation):
     """Contact name model class.
 
     Defines the contact name components.
@@ -747,18 +764,21 @@ class ContactName(ContactsModel):
     contact = fields.foreign_key_field(Contact, on_delete=CASCADE)
     name = fields.foreign_key_field(Name, on_delete=CASCADE)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_name)
         verbose_name = _(_contact_name_verbose)
         verbose_name_plural = _(pluralize(_contact_name_verbose))
         unique_together = ('contact', 'name')
 
+    def clean(self):
+        super(ContactName, self).clean()
+        validation.contact_name_validation(self)
 
 _contact_nickname = "ContactNickname"
 _contact_nickname_verbose = humanize(underscore(_contact_nickname))
 
 
-class ContactNickname(ContactsModel):
+class ContactNickname(ContactAssociation):
     """Contact nickname model class.
 
     Allow a association of contact with a nickname.
@@ -770,7 +790,7 @@ class ContactNickname(ContactsModel):
     nickname_type = fields.foreign_key_field(
         NicknameType, null=True, blank=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_nickname)
         verbose_name = _(_contact_nickname_verbose)
         verbose_name_plural = _(pluralize(_contact_nickname_verbose))
@@ -781,7 +801,7 @@ _contact_organization = "ContactOrganization"
 _contact_organization_verbose = humanize(underscore(_contact_organization))
 
 
-class ContactOrganization(ContactsModel):
+class ContactOrganization(ContactAssociation):
     """Contact organization model class.
     A contact may be associated
     with 0 or more organizations:
@@ -791,7 +811,7 @@ class ContactOrganization(ContactsModel):
     organization = fields.foreign_key_field(Organization, on_delete=CASCADE)
     unit = fields.foreign_key_field(OrganizationUnit, blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_organization)
         verbose_name = _(_contact_organization_verbose)
         verbose_name_plural = _(pluralize(_contact_organization_verbose))
@@ -801,7 +821,7 @@ _contact_phone = "ContactPhone"
 _contact_phone_verbose = humanize(underscore(_contact_phone))
 
 
-class ContactPhone(ContactsModel):
+class ContactPhone(ContactAssociation):
     """Contact phone model class.
 
     Capture contact telephone(s) attributes.
@@ -812,7 +832,7 @@ class ContactPhone(ContactsModel):
     phone = fields.foreign_key_field(Phone, on_delete=CASCADE)
     phone_type = fields.foreign_key_field(PhoneType, blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_phone)
         verbose_name = _(_contact_phone_verbose)
         verbose_name_plural = _(pluralize(_contact_phone_verbose))
@@ -842,7 +862,7 @@ _contact_role = "ContactRole"
 _contact_role_verbose = humanize(underscore(_contact_role))
 
 
-class ContactRole(ContactsModel):
+class ContactRole(ContactAssociation):
     """
     Contract role model class.
 
@@ -857,7 +877,7 @@ class ContactRole(ContactsModel):
     organization = fields.foreign_key_field(Organization,
                                             blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_role)
         verbose_name = _(_contact_role_verbose)
         verbose_name_plural = _(pluralize(_contact_role_verbose))
@@ -867,7 +887,7 @@ _contact_timezone = "ContactTimezone"
 _contact_timezone_verbose = humanize(underscore(_contact_timezone))
 
 
-class ContactTimezone(ContactsModel):
+class ContactTimezone(ContactAssociation):
     """
     Contact time zone model class.
 
@@ -880,7 +900,7 @@ class ContactTimezone(ContactsModel):
     timezone_type = fields.foreign_key_field(
         TimezoneType, blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_timezone)
         verbose_name = _(_contact_timezone_verbose)
         verbose_name_plural = _(pluralize(_contact_timezone_verbose))
@@ -891,7 +911,7 @@ _contact_title = "ContactTitle"
 _contact_title_verbose = humanize(underscore(_contact_title))
 
 
-class ContactTitle(ContactsModel):
+class ContactTitle(ContactAssociation):
     """
     Contact title model class.
 
@@ -906,7 +926,7 @@ class ContactTitle(ContactsModel):
     organization = fields.foreign_key_field(Organization,
                                             blank=True, null=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_title)
         verbose_name = _(_contact_title_verbose)
         verbose_name_plural = _(pluralize(_contact_title_verbose))
@@ -916,7 +936,7 @@ _contact_url = "ContactUrl"
 _contact_url_verbose = humanize(underscore(_contact_url))
 
 
-class ContactUrl(ContactsModel):
+class ContactUrl(ContactAssociation):
     """ContactUrl model class.
 
     A contact may be associated with 0:* urls.  These may include
@@ -926,7 +946,7 @@ class ContactUrl(ContactsModel):
     url = fields.foreign_key_field(Url, on_delete=CASCADE)
     url_type = fields.foreign_key_field(UrlType, null=True, blank=True)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _contact_url)
         verbose_name = _(_contact_url_verbose)
         verbose_name_plural = _(pluralize(_contact_url_verbose))
@@ -937,7 +957,7 @@ _related_contact = "RelatedContact"
 _related_contact_verbose = humanize(underscore(_related_contact))
 
 
-class RelatedContact(ContactsModel):
+class RelatedContact(ContactAssociation):
     """Related contact model class.
 
     Capture related contact attributes.  A contact may be associated
@@ -952,15 +972,19 @@ class RelatedContact(ContactsModel):
         Contact,
         on_delete=CASCADE,
         related_name="%(app_label)s_%(class)s_related_to_contact")
-    contract_relationship_type = fields.foreign_key_field(
+    contact_relationship_type = fields.foreign_key_field(
         ContactRelationshipType)
 
-    class Meta(ContactsModel.Meta):
+    class Meta(ContactAssociation.Meta):
         db_table = db_table(_app_label, _related_contact)
         verbose_name = _(_related_contact_verbose)
         verbose_name_plural = _(pluralize(_related_contact_verbose))
         unique_together = ("from_contact", "to_contact",
-                           "contract_relationship_type")
+                           "contact_relationship_type")
+
+    def clean(self):
+        super(RelatedContact, self).clean()
+        validation.related_contact_validation(self)
 
 
 PERMISSION_ADD = "contacts.add_contact"

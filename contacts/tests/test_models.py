@@ -86,7 +86,7 @@ class ContactTypeTestCase(ContactsNamedModelTestCase):
 class ContactRelationshipTypeTestCase(ContactsNamedModelTestCase):
     """ContactRelationship model unit test class.
     """
-    def test_contract_relationship_type_crud(self):
+    def test_contact_relationship_type_crud(self):
         self.verify_named_model_crud(
             names=("name_1", "name_2"),
             factory_class=factories.ContactRelationshipTypeModelFactory,
@@ -917,7 +917,7 @@ class RelatedContactTestCase(ContactAssociationTestCase):
         rel_type = factories.ContactRelationshipTypeModelFactory()
         related_contact = models.Contact.objects.related_contact_add(
             from_contact, to_contract,
-            contract_relationship_type=rel_type)
+            contact_relationship_type=rel_type)
         self.assertTrue(related_contact,
                         "RelatedContact creation error")
         self.assertEqual(from_contact.related_contacts.count(), 1)
