@@ -490,7 +490,7 @@ class Contact(ContactsModel):
 
     def clean(self):
         super(Contact, self).clean()
-        validation.name_validation(self.name, self.formatted_name)
+        validation.contact_validation(self)
 
     @property
     def display_name(self):
@@ -605,6 +605,10 @@ class ContactFormattedName(ContactAssociation):
         verbose_name = _(_formatted_name_verbose)
         verbose_name_plural = _(pluralize(_formatted_name_verbose))
         unique_together = ('contact', 'name')
+
+    def clean(self):
+        super(ContactFormattedName, self).clean()
+        validation.contact_formatted_name_validation(self)
 
 _contact_geographic_location = "ContactGeographicLocation"
 _contact_geographic_location_verbose = humanize(
@@ -763,6 +767,9 @@ class ContactName(ContactAssociation):
         verbose_name_plural = _(pluralize(_contact_name_verbose))
         unique_together = ('contact', 'name')
 
+    def clean(self):
+        super(ContactName, self).clean()
+        validation.contact_name_validation(self)
 
 _contact_nickname = "ContactNickname"
 _contact_nickname_verbose = humanize(underscore(_contact_nickname))

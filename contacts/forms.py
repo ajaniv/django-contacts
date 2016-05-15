@@ -29,7 +29,7 @@ class ContactAdminForm(forms.PrioritizedModelAdminForm):
 
 
 class ContactTypeAdminForm(forms.NamedModelAdminForm):
-    """ContactType  model admin form class.
+    """ContactType model admin form class.
     """
     class Meta(forms.NamedModelAdminForm.Meta):
         """Form meta class."""
@@ -37,7 +37,7 @@ class ContactTypeAdminForm(forms.NamedModelAdminForm):
 
 
 class ContactRelationshipTypeAdminForm(forms.NamedModelAdminForm):
-    """ContactRelationshipType  model admin form class.
+    """ContactRelationshipType model admin form class.
     """
     class Meta(forms.NamedModelAdminForm.Meta):
         """Form meta class."""
@@ -54,7 +54,7 @@ class ContactAssociationAdminForm(forms.PrioritizedModelAdminForm):
 
 
 class ContactAddressAdminForm(ContactAssociationAdminForm):
-    """ContactAddress  model admin form class.
+    """ContactAddress model admin form class.
     """
     class Meta(ContactAssociationAdminForm.Meta):
         """Form meta class."""
@@ -69,7 +69,7 @@ class ContactAddressAdminForm(ContactAssociationAdminForm):
 
 
 class ContactAnnotationAdminForm(ContactAssociationAdminForm):
-    """ContactAnnotation  model admin form class.
+    """ContactAnnotation model admin form class.
     """
     class Meta(ContactAssociationAdminForm.Meta):
         """Form meta class."""
@@ -81,3 +81,138 @@ class ContactAnnotationAdminForm(ContactAssociationAdminForm):
         help_texts = dict_merge(
             ContactAssociationAdminForm.Meta.help_texts,
             text.contact_annotation_help_texts)
+
+
+class ContactCategoryAdminForm(ContactAssociationAdminForm):
+    """ContactCategory model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactCategory
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_category_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_category_help_texts)
+
+
+class ContactEmailAdminForm(ContactAssociationAdminForm):
+    """ContactEmail model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactEmail
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_email_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_email_help_texts)
+
+
+class ContactFormattedNameAdminForm(ContactAssociationAdminForm):
+    """ContactFormattedName model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactFormattedName
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_formatted_name_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_formatted_name_help_texts)
+
+
+class ContactGeographicLocationAdminForm(ContactAssociationAdminForm):
+    """ContactGeographicLocation model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactGeographicLocation
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_geographic_location_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_geographic_location_help_texts)
+
+
+class ContactGroupAdminForm(ContactAssociationAdminForm):
+    """ContactGroup model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactGroup
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_group_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_group_help_texts)
+
+
+class ContactInstantMessagingAdminForm(ContactAssociationAdminForm):
+    """ContactInstantMessaging model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactInstantMessaging
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_instant_messaging_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_instant_messaging_help_texts)
+
+
+class ContactLanguageAdminForm(ContactAssociationAdminForm):
+    """ContactLanguage model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactLanguage
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_language_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_language_help_texts)
+
+
+class ContactLogoAdminForm(ContactAssociationAdminForm):
+    """ContactLogo model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactLogo
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_logo_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_logo_help_texts)
+
+
+class ContactNameAdminForm(ContactAssociationAdminForm):
+    """ContactName model admin form class.
+    """
+    class Meta(ContactAssociationAdminForm.Meta):
+        """Form meta class."""
+        model = models.ContactName
+        labels = dict_merge(
+            ContactAssociationAdminForm.Meta.labels,
+            text.contact_name_labels)
+
+        help_texts = dict_merge(
+            ContactAssociationAdminForm.Meta.help_texts,
+            text.contact_name_help_texts)

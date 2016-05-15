@@ -28,6 +28,9 @@ class OrderedFormSet(BaseInlineFormSet):
                      self).get_queryset().order_by(self.order_clause)
 
 
+_contacts_inline_fields = ("id", "priority")
+
+
 class ContactsInline(admin.TabularInline):
     """Base  contacts admin inline class."""
     readonly_fields = (
@@ -38,29 +41,144 @@ class ContactsInline(admin.TabularInline):
     extra = 1
 
 _address_fields = (
-    ("id", "priority", "address", "address_type", ),)
+    _contacts_inline_fields + ("address", "address_type", ),)
 
 
 class AddressInline(ContactsInline):
+    """Address inline class."""
     model = models.ContactAddress
     form = forms.ContactAddressAdminForm
     fieldsets = (
-        ('Contact address',
-         {'fields': _address_fields}),
+        ("Contact address",
+         {"fields": _address_fields}),
     )
 
 _annotation_fields = (
-    ("id", "priority", "annotation", ),)
+    _contacts_inline_fields + ("annotation", ),)
 
 
 class AnnotationInline(ContactsInline):
+    """Annotation inline class."""
     model = models.ContactAnnotation
-    form = forms.ContactAddressAdminForm
+    form = forms.ContactAnnotationAdminForm
     fieldsets = (
-        ('Contact annotation',
-         {'fields': _annotation_fields}),
+        ("Contact annotation",
+         {"fields": _annotation_fields}),
     )
 
+_category_fields = (
+    _contacts_inline_fields + ("category", ),)
+
+
+class CategoryInline(ContactsInline):
+    """Category inline class."""
+    model = models.ContactCategory
+    form = forms.ContactCategoryAdminForm
+    fieldsets = (
+        ("Contact category",
+         {"fields": _category_fields}),
+    )
+
+_email_fields = (
+    _contacts_inline_fields + ("email", "email_type"),)
+
+
+class EmailInline(ContactsInline):
+    """Email inline class."""
+    model = models.ContactEmail
+    form = forms.ContactEmailAdminForm
+    fieldsets = (
+        ("Contact email",
+         {"fields": _email_fields}),
+    )
+
+_formatted_name_fields = (
+    _contacts_inline_fields + ("name",),)
+
+
+class FormattedNameInline(ContactsInline):
+    """FormattedName inline class."""
+    model = models.ContactFormattedName
+    form = forms.ContactFormattedNameAdminForm
+    fieldsets = (
+        ("Contact formatted name",
+         {"fields": _formatted_name_fields}),
+    )
+
+_geographic_location_fields = (
+    _contacts_inline_fields + ("geographic_location",
+                               "geographic_location_type"),)
+
+
+class GeographicLocationInline(ContactsInline):
+    """GeographicLocation inline class."""
+    model = models.ContactGeographicLocation
+    form = forms.ContactGeographicLocationAdminForm
+    fieldsets = (
+        ("Contact geographic location",
+         {"fields": _geographic_location_fields}),
+    )
+
+_group_fields = (
+    _contacts_inline_fields + ("group",),)
+
+
+class GroupInline(ContactsInline):
+    """Group inline class."""
+    model = models.ContactGroup
+    form = forms.ContactGroupAdminForm
+    fieldsets = (
+        ("Contact group",
+         {"fields": _group_fields}),
+    )
+
+_instant_messaging_fields = (
+    _contacts_inline_fields + ("instant_messaging", "instant_messaging_type"),)
+
+
+class InstantMessagingInline(ContactsInline):
+    model = models.ContactInstantMessaging
+    form = forms.ContactInstantMessagingAdminForm
+    fieldsets = (
+        ("Contact instant messaging",
+         {"fields": _instant_messaging_fields}),
+    )
+
+_language_fields = (
+    _contacts_inline_fields + ("language", "language_type"),)
+
+
+class LanguageInline(ContactsInline):
+    model = models.ContactLanguage
+    form = forms.ContactLanguageAdminForm
+    fieldsets = (
+        ("Contact language",
+         {"fields": _language_fields}),
+    )
+
+_logo_fields = (
+    _contacts_inline_fields + ("image_reference", "logo_type"),)
+
+
+class LogoInline(ContactsInline):
+    model = models.ContactLogo
+    form = forms.ContactLogoAdminForm
+    fieldsets = (
+        ("Contact logo",
+         {"fields": _logo_fields}),
+    )
+
+_name_fields = (
+    _contacts_inline_fields + ("name",),)
+
+
+class NameInline(ContactsInline):
+    model = models.ContactName
+    form = forms.ContactNameAdminForm
+    fieldsets = (
+        ("Contact name",
+         {"fields": _name_fields}),
+    )
 
 CONTACT_NAME_SIZE = 60
 
@@ -78,15 +196,20 @@ class ContactAdmin(PrioritizedModelAdmin):
     """
     Contact model admin class
     """
-    inlines = (AddressInline, AnnotationInline)
+    inlines = (
+        AddressInline, AnnotationInline, CategoryInline, EmailInline,
+        FormattedNameInline, GeographicLocationInline, GroupInline,
+        InstantMessagingInline, LanguageInline, LogoInline,
+        NameInline)
+
     form = forms.ContactAdminForm
     list_display = ("id", "name", "formatted_name", "priority", "contact_type",
                     "version", "update_time", "update_user")
     list_display_links = ("id", "name", "formatted_name")
 
     fieldsets = (
-        ('Contact',
-         {'fields': _contact_fields}),
+        ("Contact",
+         {"fields": _contact_fields}),
     ) + PrioritizedModelAdmin.get_field_sets()
 
     def save_formset(self, request, form, formset, change):
