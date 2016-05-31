@@ -8,6 +8,15 @@ Django location application admin  module.
 from __future__ import absolute_import
 from django.forms.models import BaseInlineFormSet
 from django.contrib import admin
+from django.core.urlresolvers import reverse
+from django.template import RequestContext
+from django.shortcuts import render_to_response, get_object_or_404, redirect
+
+from guardian.admin import GuardedModelAdminMixin, GroupManage, UserManage
+from guardian.shortcuts import get_objects_for_user
+from guardian.compat import OrderedDict, get_user_model, get_model_name
+from guardian.shortcuts import get_users_with_perms
+from guardian.shortcuts import get_groups_with_perms
 
 from django_core_utils.admin import (NamedModelAdmin,
                                      PrioritizedModelAdmin,
@@ -303,10 +312,11 @@ _contact_fields = (
     ("gender",))
 
 
-class ContactAdmin(PrioritizedModelAdmin):
+class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
     """
     Contact model admin class
     """
+    user_owned_objects_field = 'creation_user'
     inlines = (
         AddressInline, AnnotationInline, CategoryInline, EmailInline,
         FormattedNameInline, GeographicLocationInline, GroupInline,
@@ -333,10 +343,119 @@ class ContactAdmin(PrioritizedModelAdmin):
 
         super(ContactAdmin, self).save_formset(request, form, formset, change)
 
+    def get_queryset(self, request):
 
-class UserProfileAdmin(admin.ModelAdmin):
+        if (request.user.is_superuser or
+                self.user_can_access_owned_objects_only):
+            return super(ContactAdmin, self).get_queryset(request)
+
+        contacts_qs = get_objects_for_user(
+            request.user, 'contacts.read_contact', accept_global_perms=False)
+
+        return contacts_qs
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ContactAdmin, self).get_form(request, obj, **kwargs)
+        form.request_user = request.user
+        return form
+
+    def obj_perms_manage_view(self, request, object_pk):
+        """
+        Main object permissions view. Presents all users and groups with any
+        object permissions for the current model *instance*. Users or groups
+        without object permissions for related *instance* would **not** be
+        shown. In order to add or manage user or group one should use links or
+        forms presented within the page.
+        """
+        if not self.has_change_permission(request, None):
+            post_url = reverse('admin:index', current_app=self.admin_site.name)
+            return redirect(post_url)
+
+        try:
+            # django >= 1.7
+            from django.contrib.admin.utils import unquote
+        except ImportError:
+            # django < 1.7
+            from django.contrib.admin.util import unquote
+        obj = get_object_or_404(self.get_queryset(
+            request), pk=unquote(object_pk))
+        owning_user = getattr(obj, self.user_owned_objects_field)
+
+        if owning_user != request.user:
+            post_url = reverse('admin:index', current_app=self.admin_site.name)
+            return redirect(post_url)
+
+        users_perms = OrderedDict(
+            sorted(
+                get_users_with_perms(obj, attach_perms=True,
+                                     with_group_users=False).items(),
+                key=lambda user: getattr(
+                    user[0], get_user_model().USERNAME_FIELD)
+            )
+        )
+
+        groups_perms = OrderedDict(
+            sorted(
+                get_groups_with_perms(obj, attach_perms=True).items(),
+                key=lambda group: group[0].name
+            )
+        )
+
+        if request.method == 'POST' and 'submit_manage_user' in request.POST:
+            user_form = UserManage(request.POST)
+            group_form = GroupManage()
+            info = (
+                self.admin_site.name,
+                self.model._meta.app_label,
+                get_model_name(self.model)
+            )
+            if user_form.is_valid():
+                user_id = user_form.cleaned_data['user'].pk
+                url = reverse(
+                    '%s:%s_%s_permissions_manage_user' % info,
+                    args=[obj.pk, user_id]
+                )
+                return redirect(url)
+        elif (request.method == 'POST' and
+              'submit_manage_group' in request.POST):
+            user_form = UserManage()
+            group_form = GroupManage(request.POST)
+            info = (
+                self.admin_site.name,
+                self.model._meta.app_label,
+                get_model_name(self.model)
+            )
+            if group_form.is_valid():
+                group_id = group_form.cleaned_data['group'].id
+                url = reverse(
+                    '%s:%s_%s_permissions_manage_group' % info,
+                    args=[obj.pk, group_id]
+                )
+                return redirect(url)
+        else:
+            user_form = UserManage()
+            group_form = GroupManage()
+
+        context = self.get_obj_perms_base_context(request, obj)
+        context['users_perms'] = users_perms
+        context['groups_perms'] = groups_perms
+        context['user_form'] = user_form
+        context['group_form'] = group_form
+
+        # https://github.com/django/django/commit/cf1f36bb6eb34fafe6c224003ad585a647f6117b
+        request.current_app = self.admin_site.name
+
+        return render_to_response(
+            self.get_obj_perms_manage_template(),
+            context,
+            RequestContext(request))
+
+
+class UserProfileAdmin(GuardedModelAdminMixin, admin.ModelAdmin):
     """Versioned model admin class.
     """
+    user_can_access_owned_objects_only = True
+    user_owned_objects_field = "creation_user"
     form = forms.UserProfileAdminForm
     list_display = ("id", "get_username")
     list_filter = ("user__username",)
