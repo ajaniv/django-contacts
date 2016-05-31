@@ -7,7 +7,9 @@ Django contacts application forms  module.
 """
 from __future__ import absolute_import
 from django.forms import ModelForm
+from django.core.exceptions import ValidationError
 from django_core_utils import forms
+from guardian.core import ObjectPermissionChecker
 from python_core_utils.core import dict_merge
 
 from . import models
@@ -27,6 +29,13 @@ class ContactAdminForm(forms.PrioritizedModelAdminForm):
         help_texts = dict_merge(
             forms.PrioritizedModelAdminForm.Meta.help_texts,
             text.contact_help_texts)
+
+    def clean(self):
+        checker = ObjectPermissionChecker(self.request_user)
+        if not checker.has_perm('contacts.write_contact', self.instance):
+            raise ValidationError("User %s has no write permissions" %
+                                  self.request_user.username)
+        return super(ContactAdminForm, self).clean()
 
 
 class ContactTypeAdminForm(forms.NamedModelAdminForm):

@@ -9,6 +9,10 @@ from __future__ import absolute_import
 from django.forms.models import BaseInlineFormSet
 from django.contrib import admin
 
+from guardian.admin import GuardedModelAdminMixin
+from guardian.shortcuts import get_objects_for_user
+
+
 from django_core_utils.admin import (NamedModelAdmin,
                                      PrioritizedModelAdmin,
                                      admin_site_register,
@@ -303,10 +307,11 @@ _contact_fields = (
     ("gender",))
 
 
-class ContactAdmin(PrioritizedModelAdmin):
+class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
     """
     Contact model admin class
     """
+
     inlines = (
         AddressInline, AnnotationInline, CategoryInline, EmailInline,
         FormattedNameInline, GeographicLocationInline, GroupInline,
@@ -333,10 +338,28 @@ class ContactAdmin(PrioritizedModelAdmin):
 
         super(ContactAdmin, self).save_formset(request, form, formset, change)
 
+    def get_queryset(self, request):
 
-class UserProfileAdmin(admin.ModelAdmin):
+        if (request.user.is_superuser or
+                self.user_can_access_owned_objects_only):
+            return super(ContactAdmin, self).get_queryset(request)
+
+        contacts_qs = get_objects_for_user(
+            request.user, 'contacts.read_contact', accept_global_perms=False)
+
+        return contacts_qs
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ContactAdmin, self).get_form(request, obj, **kwargs)
+        form.request_user = request.user
+        return form
+
+
+class UserProfileAdmin(GuardedModelAdminMixin, admin.ModelAdmin):
     """Versioned model admin class.
     """
+    user_can_access_owned_objects_only = True
+    user_owned_objects_field = "creation_user"
     form = forms.UserProfileAdminForm
     list_display = ("id", "get_username")
     list_filter = ("user__username",)
