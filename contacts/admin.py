@@ -49,6 +49,26 @@ class ContactsInline(admin.TabularInline):
     formset = OrderedFormSet
     extra = 1
 
+    def __init__(self, parent_model, admin_site, parent_object=None):
+        # Capture parent object during initialization.
+        super(ContactsInline, self).__init__(parent_model, admin_site)
+        self.parent_object = parent_object
+
+    def _formfield_for_foreignkey(
+            self, model_class, field_name, db_field, request, **kwargs):
+        """Limit the set of foreign keys displayed."""
+        if db_field.name == field_name and not request.user.is_superuser:
+            manager = model_class.objects
+            if self.parent_object:
+                kwargs["queryset"] = manager.filter(
+                    creation_user=self.parent_object.creation_user)
+            else:
+                kwargs["queryset"] = manager.filter(creation_user=request.user)
+        return super(
+            ContactsInline, self).formfield_for_foreignkey(db_field,
+                                                           request,
+                                                           **kwargs)
+
 _address_fields = (
     _contacts_inline_fields + ("address", "address_type", ),)
 
@@ -61,6 +81,11 @@ class AddressInline(ContactsInline):
         ("Contact address",
          {"fields": _address_fields}),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Address, "address", db_field, request)
 
 _annotation_fields = (
     _contacts_inline_fields + ("annotation", ),)
@@ -75,6 +100,11 @@ class AnnotationInline(ContactsInline):
          {"fields": _annotation_fields}),
     )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Annotation, "annotation", db_field, request)
+
 _category_fields = (
     _contacts_inline_fields + ("category", ),)
 
@@ -87,6 +117,7 @@ class CategoryInline(ContactsInline):
         ("Contact category",
          {"fields": _category_fields}),
     )
+
 
 _email_fields = (
     _contacts_inline_fields + ("email", "email_type"),)
@@ -101,6 +132,11 @@ class EmailInline(ContactsInline):
          {"fields": _email_fields}),
     )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Email, "email", db_field, request)
+
 _formatted_name_fields = (
     _contacts_inline_fields + ("name",),)
 
@@ -113,6 +149,11 @@ class FormattedNameInline(ContactsInline):
         ("Contact formatted name",
          {"fields": _formatted_name_fields}),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.FormattedName, "formatted_name", db_field, request)
 
 _geographic_location_fields = (
     _contacts_inline_fields + ("geographic_location",
@@ -141,6 +182,7 @@ class GroupInline(ContactsInline):
          {"fields": _group_fields}),
     )
 
+
 _instant_messaging_fields = (
     _contacts_inline_fields + ("instant_messaging", "instant_messaging_type"),)
 
@@ -152,6 +194,11 @@ class InstantMessagingInline(ContactsInline):
         ("Contact instant messaging",
          {"fields": _instant_messaging_fields}),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.InstantMessaging, "instant_messaging", db_field, request)
 
 _language_fields = (
     _contacts_inline_fields + ("language", "language_type"),)
@@ -177,6 +224,11 @@ class LogoInline(ContactsInline):
          {"fields": _logo_fields}),
     )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.ImageReference, "image_reference", db_field, request)
+
 _name_fields = (
     _contacts_inline_fields + ("name",),)
 
@@ -189,6 +241,11 @@ class NameInline(ContactsInline):
          {"fields": _name_fields}),
     )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Name, "name", db_field, request)
+
 _nickname_fields = (
     _contacts_inline_fields + ("name", "nickname_type"),)
 
@@ -200,6 +257,11 @@ class NicknameInline(ContactsInline):
         ("Contact nickname",
          {"fields": _nickname_fields}),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Nickname, "name", db_field, request)
 
 _organization_fields = (
     _contacts_inline_fields + ("organization", "unit"),)
@@ -225,6 +287,11 @@ class PhoneInline(ContactsInline):
          {"fields": _phone_fields}),
     )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Phone, "phone", db_field, request)
+
 _photo_fields = (
     _contacts_inline_fields + ("image_reference", "photo_type"),)
 
@@ -236,6 +303,11 @@ class PhotoInline(ContactsInline):
         ("Contact photo",
          {"fields": _photo_fields}),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.ImageReference, "image_reference", db_field, request)
 
 _role_fields = (
     _contacts_inline_fields + ("role", "organization"),)
@@ -285,6 +357,11 @@ class UrlInline(ContactsInline):
          {"fields": _url_fields}),
     )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Url, "url", db_field, request)
+
 
 _related_contact_fields = (
     _contacts_inline_fields + (
@@ -299,6 +376,11 @@ class RelatedContactInline(ContactsInline):
         ("Related contact",
          {"fields": _related_contact_fields}),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # override base class to limit foreign keys displayed
+        return self._formfield_for_foreignkey(
+            models.Contact, "to_contact", db_field, request)
 
 CONTACT_NAME_SIZE = 60
 
@@ -354,11 +436,6 @@ class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
 
         return contacts_qs
 
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(ContactAdmin, self).get_form(request, obj, **kwargs)
-        form.request_user = request.user
-        return form
-
     def obj_perms_manage_view(self, request, object_pk):
         """
         Main object permissions view. Presents all users and groups with any
@@ -367,6 +444,9 @@ class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
         shown. In order to add or manage user or group one should use links or
         forms presented within the page.
         """
+        # Note: had to override gurdian implementation as it was allowing
+        # whoever has read/write permissions to instance to change the
+        # permissions.
         if not self.has_change_permission(request, None):
             post_url = reverse('admin:index', current_app=self.admin_site.name)
             return redirect(post_url)
@@ -449,6 +529,49 @@ class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
             self.get_obj_perms_manage_template(),
             context,
             RequestContext(request))
+
+    def contact(self, request):
+        """Return associated contact instance."""
+        if not hasattr(self, '_contact'):
+            manager = models.Contact.objects
+            parent_obj_id = request.resolver_match.args[0]
+            self._contact = manager.get_or_none(pk=parent_obj_id)
+        return self._contact
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Limit the foreinkey instances displayed."""
+        fields = {"name": models.Name.objects,
+                  "formatted_name": models.FormattedName.objects}
+        if db_field.name in fields and not request.user.is_superuser:
+            manager = fields[db_field.name]
+            contact = self.contact(request)
+            if contact:
+                kwargs["queryset"] = manager.filter(
+                    creation_user=contact.creation_user)
+            else:
+                kwargs["queryset"] = manager.filter(
+                    creation_user=request.user)
+
+        return super(
+            ContactAdmin, self).formfield_for_foreignkey(
+                db_field, request, **kwargs)
+
+    def get_inline_instances(self, request, obj):
+        """Create, initialize, and return  the associated inline instances."""
+        inline_instances = []
+        for inline_class in self.inlines:
+            inline = inline_class(
+                self.model, self.admin_site, parent_object=obj)
+            inline_instances.append(inline)
+        return inline_instances
+
+    def get_form(self, request, obj=None, **kwargs):
+        """create, initialize and return associated form."""
+        # order of following statements is important to reduce db queries.
+        self._contact = obj
+        form = super(ContactAdmin, self).get_form(request, obj, **kwargs)
+        form.request_user = request.user
+        return form
 
 
 class UserProfileAdmin(GuardedModelAdminMixin, admin.ModelAdmin):
