@@ -31,10 +31,11 @@ class ContactAdminForm(forms.PrioritizedModelAdminForm):
             text.contact_help_texts)
 
     def clean(self):
-        checker = ObjectPermissionChecker(self.request_user)
-        if not checker.has_perm('contacts.write_contact', self.instance):
-            raise ValidationError("User %s has no write permissions" %
-                                  self.request_user.username)
+        if self.instance.id:
+            checker = ObjectPermissionChecker(self.request_user)
+            if not checker.has_perm('contacts.write_contact', self.instance):
+                raise ValidationError("User %s has no write permissions" %
+                                      self.request_user.username)
         return super(ContactAdminForm, self).clean()
 
 
