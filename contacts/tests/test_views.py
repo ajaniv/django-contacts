@@ -44,12 +44,12 @@ class ConctactTypeApiTestCase(NamedModelApiTestCase):
 
 class ConctactRelationshipTypeApiTestCase(NamedModelApiTestCase):
     """Contact  API unit test class."""
-    factory_class = factories.ContactModelFactory
-    model_class = models.Contact
-    serializer_class = serializers.ContactSerializer
+    factory_class = factories.ContactRelationshipTypeModelFactory
+    model_class = models.ContactRelationshipType
+    serializer_class = serializers.ContactRelationshipTypeSerializer
 
-    url_detail = "contact-detail"
-    url_list = "contact-list"
+    url_detail = "contact-relationship-type-detail"
+    url_list = "contact-relationship-type-list"
 
     name = factories.ContactRelationshipTypeModelFactory.name
 
@@ -77,8 +77,8 @@ class ContactApiTestCase(VersionedModelApiTestCase):
     model_class = models.Contact
     serializer_class = serializers.ContactSerializer
 
-    url_detail = "contacts-detail"
-    url_list = "contacts-list"
+    url_detail = "contact-detail"
+    url_list = "contact-list"
 
     simple_attrs = ("anniversary", "birth_date")
     foreign_keys = ("contact_type", "formatted_name", "gender", "name")
