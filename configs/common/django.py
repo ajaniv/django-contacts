@@ -83,7 +83,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'django_core_models_settings.urls'
+ROOT_URLCONF = 'django_contacts.urls'
 
 TEMPLATES = [
     {

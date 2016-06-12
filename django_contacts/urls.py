@@ -21,14 +21,25 @@ from django.conf import settings
 from django.views.generic.base import RedirectView
 from rest_framework.urlpatterns import format_suffix_patterns
 
+from django_core_utils.views import UserList, UserDetail
+from contacts import views
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', RedirectView.as_view(url='/admin')),
 
 ]
 
-urlpatterns_api = [
-    url(r'^api/root/', include('django_core_models.urls')),
+
+urlpatterns_api_base = [
+    url(r'^end-points/$', views.api_root, name='api-list'),
+    url(r'^users/$', UserList.as_view(), name='user-list'),
+    url(r'^users/(?P<pk>[0-9]+)/$', UserDetail.as_view(), name='user-detail'),
+]
+
+
+urlpatterns_api_core_models = [
+    # url(r'^api/root/', include('django_core_models.urls')),
     url(r'^api/core-models/', include('django_core_models.core.urls')),
     url(r'^api/demographics/',
         include('django_core_models.demographics.urls')),
@@ -41,6 +52,14 @@ urlpatterns_api = [
     url(r'^api/social-media/',
         include('django_core_models.social_media.urls')),
 ]
+
+urlpatterns_api_contacts = [
+    url(r'^api/contacts/', include('contacts.urls')),
+]
+
+urlpatterns_api = (urlpatterns_api_core_models +
+                   urlpatterns_api_contacts +
+                   urlpatterns_api_base)
 
 urlpatterns_rest_framework = [
     url(r'^api-auth/',
