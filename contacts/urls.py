@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^contacts/$',
         views.ContactList.as_view(),
         name='contact-list'),
-    url(r'^contacts(?P<pk>[0-9]+)/$',
+    url(r'^contacts/(?P<pk>[0-9]+)/$',
         views.ContactDetail.as_view(),
         name='contact-detail'),
 

@@ -80,7 +80,7 @@ def contacts_urls(request, content_format):
     """Return contacts application end points."""
     return {
         'contacts': reverse(
-            'contacts-list',
+            'contact-list',
             request=request,
             format=content_format),
         'contact-types': reverse(
