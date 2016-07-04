@@ -33,8 +33,7 @@ class ContactsModelSerializer(PrioritizedModelSerializer):
     class Meta(PrioritizedModelSerializer.Meta):
         """Meta class definition."""
         model = models.ContactsModel
-        fields = PrioritizedModelSerializer.Meta.fields + (
-            "name",)
+        fields = PrioritizedModelSerializer.Meta.fields
 
 
 class ContactSerializer(ContactsModelSerializer):
@@ -46,3 +45,63 @@ class ContactSerializer(ContactsModelSerializer):
         fields = ContactsModelSerializer.Meta.fields + (
             "formatted_name", "name", "anniversary",
             "birth_date", "contact_type", "gender")
+
+
+class ContactAddressSerializer(ContactsModelSerializer):
+    """ContactAddress model serializer class."""
+
+    class Meta(ContactsModelSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactAddress
+        fields = ContactsModelSerializer.Meta.fields + (
+            "contact", "address", "address_type")
+
+
+class ContactAnnotationSerializer(ContactsModelSerializer):
+    """ContactAnnotation model serializer class."""
+
+    class Meta(ContactsModelSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactAnnotation
+        fields = ContactsModelSerializer.Meta.fields + (
+            "contact", "annotation")
+
+
+class ContactCategorySerializer(ContactsModelSerializer):
+    """ContactCategory model serializer class."""
+
+    class Meta(ContactsModelSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactCategory
+        fields = ContactsModelSerializer.Meta.fields + (
+            "contact", "category")
+
+
+class ContactEmailSerializer(ContactsModelSerializer):
+    """ContactEmail model serializer class."""
+
+    class Meta(ContactsModelSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactEmail
+        fields = ContactsModelSerializer.Meta.fields + (
+            "contact", "email", "email_type")
+
+
+class ContactFormattedNameSerializer(ContactsModelSerializer):
+    """ContactFormattedName model serializer class."""
+
+    class Meta(ContactsModelSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactFormattedName
+        fields = ContactsModelSerializer.Meta.fields + (
+            "contact", "name")
+
+
+class ContactGeographicLocationSerializer(ContactsModelSerializer):
+    """ContactGeographicLocation model serializer class."""
+
+    class Meta(ContactsModelSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactGeographicLocation
+        fields = ContactsModelSerializer.Meta.fields + (
+            "contact", "geographic_location", "geographic_location_type")
