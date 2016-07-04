@@ -76,11 +76,151 @@ class ContactDetail(ContactMixin, ObjectDetailView):
     pass
 
 
+class ContactAddressMixin(object):
+    """ContactAddress mixin class."""
+    queryset = models.ContactAddress.objects.all()
+    serializer_class = serializers.ContactAddressSerializer
+
+
+class ContactAddressList(ContactAddressMixin, ObjectListView):
+    """Class to list all ContactAddress instances,
+    or create new ContactAddress instance."""
+    pass
+
+
+class ContactAddressDetail(ContactAddressMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactAddress instance.
+    """
+    pass
+
+
+class ContactAnnotationMixin(object):
+    """ContactAnnotation mixin class."""
+    queryset = models.ContactAnnotation.objects.all()
+    serializer_class = serializers.ContactAnnotationSerializer
+
+
+class ContactAnnotationList(ContactAnnotationMixin, ObjectListView):
+    """Class to list all ContactAnnotation instances,
+    or create new ContactAnnotation instance."""
+    pass
+
+
+class ContactAnnotationDetail(ContactAnnotationMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactAnnotation instance.
+    """
+    pass
+
+
+class ContactCategoryMixin(object):
+    """ContactCategory mixin class."""
+    queryset = models.ContactCategory.objects.all()
+    serializer_class = serializers.ContactCategorySerializer
+
+
+class ContactCategoryList(ContactCategoryMixin, ObjectListView):
+    """Class to list all ContactCategory instances,
+    or create new ContactCategory instance."""
+    pass
+
+
+class ContactCategoryDetail(ContactCategoryMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactCategory instance.
+    """
+    pass
+
+
+class ContactEmailMixin(object):
+    """ContactEmail mixin class."""
+    queryset = models.ContactEmail.objects.all()
+    serializer_class = serializers.ContactEmailSerializer
+
+
+class ContactEmailList(ContactEmailMixin, ObjectListView):
+    """Class to list all ContactEmail instances,
+    or create new ContactEmail instance."""
+    pass
+
+
+class ContactEmailDetail(ContactEmailMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactEmail instance.
+    """
+    pass
+
+
+class ContactFormattedNameMixin(object):
+    """ContactFormattedName mixin class."""
+    queryset = models.ContactFormattedName.objects.all()
+    serializer_class = serializers.ContactFormattedNameSerializer
+
+
+class ContactFormattedNameList(ContactFormattedNameMixin, ObjectListView):
+    """Class to list all ContactFormattedName instances,
+    or create new ContactFormattedName instance."""
+    pass
+
+
+class ContactFormattedNameDetail(ContactFormattedNameMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactFormattedName instance.
+    """
+    pass
+
+
+class ContactGeographicLocationMixin(object):
+    """ContactGeographicLocation mixin class."""
+    queryset = models.ContactGeographicLocation.objects.all()
+    serializer_class = serializers.ContactGeographicLocationSerializer
+
+
+class ContactGeographicLocationList(ContactGeographicLocationMixin,
+                                    ObjectListView):
+    """Class to list all ContactGeographicLocationName instances,
+    or create new ContactGeographicLocation instance."""
+    pass
+
+
+class ContactGeographicLocationDetail(ContactGeographicLocationMixin,
+                                      ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactGeographicLocation instance.
+    """
+    pass
+
+
 def contacts_urls(request, content_format):
     """Return contacts application end points."""
     return {
         'contacts': reverse(
             'contact-list',
+            request=request,
+            format=content_format),
+        'contact-addresses': reverse(
+            'contact-address-list',
+            request=request,
+            format=content_format),
+        'contact-annotations': reverse(
+            'contact-annotation-list',
+            request=request,
+            format=content_format),
+        'contact-categories': reverse(
+            'contact-category-list',
+            request=request,
+            format=content_format),
+        'contact-emails': reverse(
+            'contact-email-list',
+            request=request,
+            format=content_format),
+        'contact-formatted-names': reverse(
+            'contact-formatted-name-list',
+            request=request,
+            format=content_format),
+        'contact-geographic-locations': reverse(
+            'contact-geographic-location-list',
             request=request,
             format=content_format),
         'contact-types': reverse(
