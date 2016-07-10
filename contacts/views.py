@@ -179,7 +179,7 @@ class ContactGeographicLocationMixin(object):
 
 class ContactGeographicLocationList(ContactGeographicLocationMixin,
                                     ObjectListView):
-    """Class to list all ContactGeographicLocationName instances,
+    """Class to list all ContactGeographicLocation instances,
     or create new ContactGeographicLocation instance."""
     pass
 
@@ -188,6 +188,294 @@ class ContactGeographicLocationDetail(ContactGeographicLocationMixin,
                                       ObjectDetailView):
     """
     Class to retrieve, update or delete ContactGeographicLocation instance.
+    """
+    pass
+
+
+class ContactGroupMixin(object):
+    """ContactGroup mixin class."""
+    queryset = models.ContactGroup.objects.all()
+    serializer_class = serializers.ContactGroupSerializer
+
+
+class ContactGroupList(ContactGroupMixin, ObjectListView):
+    """Class to list all ContactGroup instances,
+    or create new ContactGroup instance."""
+    pass
+
+
+class ContactGroupDetail(ContactGroupMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactGroup instance.
+    """
+    pass
+
+
+class ContactLogoMixin(object):
+    """ContactLogo mixin class."""
+    queryset = models.ContactLogo.objects.all()
+    serializer_class = serializers.ContactLogoSerializer
+
+
+class ContactLogoList(ContactLogoMixin, ObjectListView):
+    """Class to list all ContactLogo instances,
+    or create new ContactLogo instance."""
+    pass
+
+
+class ContactLogoDetail(ContactLogoMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactLogo instance.
+    """
+    pass
+
+
+class ContactPhotoMixin(object):
+    """ContactPhoto mixin class."""
+    queryset = models.ContactPhoto.objects.all()
+    serializer_class = serializers.ContactPhotoSerializer
+
+
+class ContactPhotoList(ContactPhotoMixin, ObjectListView):
+    """Class to list all ContactPhoto instances,
+    or create new ContactPhoto instance."""
+    pass
+
+
+class ContactPhotoDetail(ContactPhotoMixin, ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactPhoto instance.
+    """
+    pass
+
+
+class ContactInstantMessagingMixin(object):
+    """ContactInstantMessaging mixin class."""
+    queryset = models.ContactInstantMessaging.objects.all()
+    serializer_class = serializers.ContactInstantMessagingSerializer
+
+
+class ContactInstantMessagingList(ContactInstantMessagingMixin,
+                                  ObjectListView):
+    """Class to list all ContactInstantMessaging instances,
+    or create new ContactInstantMessaging instance."""
+    pass
+
+
+class ContactInstantMessagingDetail(ContactInstantMessagingMixin,
+                                    ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactInstantMessaging instance.
+    """
+    pass
+
+
+class ContactLanguageMixin(object):
+    """ContactLanguage mixin class."""
+    queryset = models.ContactLanguage.objects.all()
+    serializer_class = serializers.ContactLanguageSerializer
+
+
+class ContactLanguageList(ContactLanguageMixin,
+                          ObjectListView):
+    """Class to list all ContactLanguageinstances,
+    or create new ContactLanguage instance."""
+    pass
+
+
+class ContactLanguageDetail(ContactLanguageMixin,
+                            ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactLanguage instance.
+    """
+    pass
+
+
+class ContactNameMixin(object):
+    """ContactName mixin class."""
+    queryset = models.ContactName.objects.all()
+    serializer_class = serializers.ContactNameSerializer
+
+
+class ContactNameList(ContactNameMixin,
+                      ObjectListView):
+    """Class to list all ContactNameinstances,
+    or create new ContactName instance."""
+    pass
+
+
+class ContactNameDetail(ContactNameMixin,
+                        ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactName instance.
+    """
+    pass
+
+
+class ContactNicknameMixin(object):
+    """ContactNickname mixin class."""
+    queryset = models.ContactNickname.objects.all()
+    serializer_class = serializers.ContactNicknameSerializer
+
+
+class ContactNicknameList(ContactNicknameMixin,
+                          ObjectListView):
+    """Class to list all ContactNickname instances,
+    or create new ContactNickname instance."""
+    pass
+
+
+class ContactNicknameDetail(ContactNicknameMixin,
+                            ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactNickname instance.
+    """
+    pass
+
+
+class ContactOrganizationMixin(object):
+    """ContactOrganization mixin class."""
+    queryset = models.ContactOrganization.objects.all()
+    serializer_class = serializers.ContactOrganizationSerializer
+
+
+class ContactOrganizationList(ContactOrganizationMixin,
+                              ObjectListView):
+    """Class to list all ContactOrganization instances,
+    or create new ContactOrganization instance."""
+    pass
+
+
+class ContactOrganizationDetail(ContactOrganizationMixin,
+                                ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactOrganization instance.
+    """
+    pass
+
+
+class ContactPhoneMixin(object):
+    """ContactPhone mixin class."""
+    queryset = models.ContactPhone.objects.all()
+    serializer_class = serializers.ContactPhoneSerializer
+
+
+class ContactPhoneList(ContactPhoneMixin,
+                       ObjectListView):
+    """Class to list all ContactPhone instances,
+    or create new ContactPhone instance."""
+    pass
+
+
+class ContactPhoneDetail(ContactPhoneMixin,
+                         ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactPhone instance.
+    """
+    pass
+
+
+class ContactRoleMixin(object):
+    """ContactRole mixin class."""
+    queryset = models.ContactRole.objects.all()
+    serializer_class = serializers.ContactRoleSerializer
+
+
+class ContactRoleList(ContactRoleMixin,
+                      ObjectListView):
+    """Class to list all ContactRole instances,
+    or create new ContactRole instance."""
+    pass
+
+
+class ContactRoleDetail(ContactRoleMixin,
+                        ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactRole instance.
+    """
+    pass
+
+
+class ContactTimezoneMixin(object):
+    """ContactTimezone mixin class."""
+    queryset = models.ContactTimezone.objects.all()
+    serializer_class = serializers.ContactTimezoneSerializer
+
+
+class ContactTimezoneList(ContactTimezoneMixin,
+                          ObjectListView):
+    """Class to list all ContactTimezone instances,
+    or create new ContactRole instance."""
+    pass
+
+
+class ContactTimezoneDetail(ContactTimezoneMixin,
+                            ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactTimezone instance.
+    """
+    pass
+
+
+class ContactTitleMixin(object):
+    """ContactTitle mixin class."""
+    queryset = models.ContactTitle.objects.all()
+    serializer_class = serializers.ContactTitleSerializer
+
+
+class ContactTitleList(ContactTitleMixin,
+                       ObjectListView):
+    """Class to list all ContactTitle instances,
+    or create new ContactTitle instance."""
+    pass
+
+
+class ContactTitleDetail(ContactTitleMixin,
+                         ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactTitle instance.
+    """
+    pass
+
+
+class ContactUrlMixin(object):
+    """ContactUrl mixin class."""
+    queryset = models.ContactUrl.objects.all()
+    serializer_class = serializers.ContactUrlSerializer
+
+
+class ContactUrlList(ContactUrlMixin,
+                     ObjectListView):
+    """Class to list all ContactUrl instances,
+    or create new ContactUrl instance."""
+    pass
+
+
+class ContactUrlDetail(ContactUrlMixin,
+                       ObjectDetailView):
+    """
+    Class to retrieve, update or delete ContactUrl instance.
+    """
+    pass
+
+
+class RelatedContactMixin(object):
+    """RelatedContact mixin class."""
+    queryset = models.RelatedContact.objects.all()
+    serializer_class = serializers.RelatedContactSerializer
+
+
+class RelatedContactList(RelatedContactMixin,
+                         ObjectListView):
+    """Class to list all RelatedContact instances,
+    or create new ContactUrl instance."""
+    pass
+
+
+class RelatedContactDetail(RelatedContactMixin,
+                           ObjectDetailView):
+    """
+    Class to retrieve, update or delete RelatedContact instance.
     """
     pass
 
@@ -223,12 +511,64 @@ def contacts_urls(request, content_format):
             'contact-geographic-location-list',
             request=request,
             format=content_format),
+        'contact-groups': reverse(
+            'contact-group-list',
+            request=request,
+            format=content_format),
+        'contact-instant-messaging': reverse(
+            'contact-instant-messaging-list',
+            request=request,
+            format=content_format),
+        'contact-languages': reverse(
+            'contact-language-list',
+            request=request,
+            format=content_format),
+        'contact-logos': reverse(
+            'contact-logo-list',
+            request=request,
+            format=content_format),
+        'contact-names': reverse(
+            'contact-name-list',
+            request=request,
+            format=content_format),
+        'contact-nicknames': reverse(
+            'contact-nickname-list',
+            request=request,
+            format=content_format),
+        'contact-organizations': reverse(
+            'contact-organization-list',
+            request=request,
+            format=content_format),
+        'contact-phones': reverse(
+            'contact-phone-list',
+            request=request,
+            format=content_format),
+        'contact-photos': reverse(
+            'contact-photo-list',
+            request=request,
+            format=content_format),
+        'contact-roles': reverse(
+            'contact-role-list',
+            request=request,
+            format=content_format),
+        'contact-timezones': reverse(
+            'contact-timezone-list',
+            request=request,
+            format=content_format),
+        'contact-titles': reverse(
+            'contact-title-list',
+            request=request,
+            format=content_format),
         'contact-types': reverse(
             'contact-type-list',
             request=request,
             format=content_format),
         'contact-relationship-types': reverse(
             'contact-relationship-type-list',
+            request=request,
+            format=content_format),
+        'related-contacts': reverse(
+            'related-contact-list',
             request=request,
             format=content_format),
     }

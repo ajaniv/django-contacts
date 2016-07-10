@@ -47,61 +47,220 @@ class ContactSerializer(ContactsModelSerializer):
             "birth_date", "contact_type", "gender")
 
 
-class ContactAddressSerializer(ContactsModelSerializer):
+class ContactAssociationSerializer(ContactsModelSerializer):
+    """ContactsModel serializer class."""
+    class Meta(ContactsModelSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactsModel
+        fields = PrioritizedModelSerializer.Meta.fields + (
+            "contact",)
+
+
+class ContactAddressSerializer(ContactAssociationSerializer):
     """ContactAddress model serializer class."""
 
-    class Meta(ContactsModelSerializer.Meta):
+    class Meta(ContactAssociationSerializer.Meta):
         """Meta class definition."""
         model = models.ContactAddress
-        fields = ContactsModelSerializer.Meta.fields + (
-            "contact", "address", "address_type")
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "address", "address_type")
 
 
-class ContactAnnotationSerializer(ContactsModelSerializer):
+class ContactAnnotationSerializer(ContactAssociationSerializer):
     """ContactAnnotation model serializer class."""
 
-    class Meta(ContactsModelSerializer.Meta):
+    class Meta(ContactAssociationSerializer.Meta):
         """Meta class definition."""
         model = models.ContactAnnotation
-        fields = ContactsModelSerializer.Meta.fields + (
-            "contact", "annotation")
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "annotation",)
 
 
-class ContactCategorySerializer(ContactsModelSerializer):
+class ContactCategorySerializer(ContactAssociationSerializer):
     """ContactCategory model serializer class."""
 
-    class Meta(ContactsModelSerializer.Meta):
+    class Meta(ContactAssociationSerializer.Meta):
         """Meta class definition."""
         model = models.ContactCategory
-        fields = ContactsModelSerializer.Meta.fields + (
-            "contact", "category")
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "category",)
 
 
-class ContactEmailSerializer(ContactsModelSerializer):
+class ContactEmailSerializer(ContactAssociationSerializer):
     """ContactEmail model serializer class."""
 
-    class Meta(ContactsModelSerializer.Meta):
+    class Meta(ContactAssociationSerializer.Meta):
         """Meta class definition."""
         model = models.ContactEmail
-        fields = ContactsModelSerializer.Meta.fields + (
-            "contact", "email", "email_type")
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "email", "email_type")
 
 
-class ContactFormattedNameSerializer(ContactsModelSerializer):
+class ContactFormattedNameSerializer(ContactAssociationSerializer):
     """ContactFormattedName model serializer class."""
 
-    class Meta(ContactsModelSerializer.Meta):
+    class Meta(ContactAssociationSerializer.Meta):
         """Meta class definition."""
         model = models.ContactFormattedName
-        fields = ContactsModelSerializer.Meta.fields + (
-            "contact", "name")
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "name",)
 
 
-class ContactGeographicLocationSerializer(ContactsModelSerializer):
+class ContactGeographicLocationSerializer(ContactAssociationSerializer):
     """ContactGeographicLocation model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactGeographicLocation
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "geographic_location", "geographic_location_type")
+
+
+class ContactGroupSerializer(ContactAssociationSerializer):
+    """ContactGroup model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactGroup
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "group",)
+
+
+class ContactImageSerializer(ContactAssociationSerializer):
+    """ContactImage model serializer class."""
 
     class Meta(ContactsModelSerializer.Meta):
         """Meta class definition."""
-        model = models.ContactGeographicLocation
-        fields = ContactsModelSerializer.Meta.fields + (
-            "contact", "geographic_location", "geographic_location_type")
+        model = models.ContactImage
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "image_reference",)
+
+
+class ContactLogoSerializer(ContactImageSerializer):
+    """ContactLogo model serializer class."""
+
+    class Meta(ContactImageSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactLogo
+        fields = ContactImageSerializer.Meta.fields + (
+            "logo_type",)
+
+
+class ContactPhotoSerializer(ContactImageSerializer):
+    """ContactPhoto model serializer class."""
+
+    class Meta(ContactImageSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactPhoto
+        fields = ContactImageSerializer.Meta.fields + (
+            "photo_type",)
+
+
+class ContactInstantMessagingSerializer(ContactAssociationSerializer):
+    """ContactInstantMessaging model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactInstantMessaging
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "instant_messaging", "instant_messaging_type")
+
+
+class ContactLanguageSerializer(ContactAssociationSerializer):
+    """ContactLanguage model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactLanguage
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "language", "language_type")
+
+
+class ContactNameSerializer(ContactAssociationSerializer):
+    """ContactName model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactName
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "name",)
+
+
+class ContactNicknameSerializer(ContactAssociationSerializer):
+    """ContactNickname model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactNickname
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "name", "nickname_type")
+
+
+class ContactOrganizationSerializer(ContactAssociationSerializer):
+    """ContactOrganization model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactOrganization
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "organization", "unit")
+
+
+class ContactPhoneSerializer(ContactAssociationSerializer):
+    """ContactPhone model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactPhone
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "phone", "phone_type")
+
+
+class ContactRoleSerializer(ContactAssociationSerializer):
+    """ContactRole model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactRole
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "role", "organization")
+
+
+class ContactTimezoneSerializer(ContactAssociationSerializer):
+    """ContactTimezone model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactTimezone
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "timezone", "timezone_type")
+
+
+class ContactTitleSerializer(ContactAssociationSerializer):
+    """ContactTitle model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactTitle
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "title", "organization")
+
+
+class ContactUrlSerializer(ContactAssociationSerializer):
+    """ContactUrl model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.ContactUrl
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "url", "url_type")
+
+
+class RelatedContactSerializer(ContactAssociationSerializer):
+    """ContactUrl model serializer class."""
+
+    class Meta(ContactAssociationSerializer.Meta):
+        """Meta class definition."""
+        model = models.RelatedContact
+        fields = ContactAssociationSerializer.Meta.fields + (
+            "from_contact", "to_contact", "contact_relationship_type")
