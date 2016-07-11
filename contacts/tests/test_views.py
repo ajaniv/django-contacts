@@ -26,8 +26,7 @@ from django_core_models.social_media.tests.factories import (
     InstantMessagingModelFactory,
     InstantMessagingTypeModelFactory,
     LogoTypeModelFactory,
-    PhotoTypeModelFactory
-    )
+    PhotoTypeModelFactory)
 
 
 from . import factories
