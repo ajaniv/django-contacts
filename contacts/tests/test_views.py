@@ -11,6 +11,8 @@ from django_core_utils.tests.api_test_utils import (
 from django_core_models.core.tests.factories import (
     AnnotationModelFactory,
     CategoryModelFactory)
+from django_core_models.images.tests.factories import (
+    ImageReferenceModelFactory)
 from django_core_models.locations.tests.factories import (
     USAddressModelFactory,
     AddressTypeModelFactory,
@@ -19,7 +21,12 @@ from django_core_models.locations.tests.factories import (
 from django_core_models.social_media.tests.factories import (
     EmailModelFactory,
     EmailTypeModelFactory,
-    FormattedNameModelFactory)
+    FormattedNameModelFactory,
+    GroupModelFactory,
+    InstantMessagingModelFactory,
+    InstantMessagingTypeModelFactory,
+    LogoTypeModelFactory,
+    PhotoTypeModelFactory)
 
 
 from . import factories
@@ -539,13 +546,17 @@ class ContactGeographicLocationApiTestCase(ContactAssociationApiTestCase):
 
         return data
 
-    def post_required_data(self, contact=None, name=None,
+    def post_required_data(self, contact=None, geographic_location=None,
+                           geographic_location_type=None,
                            user=None, site=None):
         """Return model post request required data."""
         data = super(
             ContactGeographicLocationApiTestCase, self).post_required_data(
                 user, site)
-        data.update(self.contact_geographic_location_data(contact, name))
+        data.update(
+            self.contact_geographic_location_data(contact,
+                                                  geographic_location,
+                                                  geographic_location_type))
         return data
 
     def verify_create_contact_geographic_location(
@@ -580,4 +591,290 @@ class ContactGeographicLocationApiTestCase(ContactAssociationApiTestCase):
         self.verify_put(self.url_detail, instance, data, self.serializer_class)
 
     def test_delete_contact_geographic_location(self):
+        self.verify_delete_default()
+
+
+class ContactGroupApiTestCase(ContactAssociationApiTestCase):
+    """ContactGroup API unit test class."""
+    factory_class = factories.ContactGroupModelFactory
+    model_class = models.ContactGroup
+    serializer_class = serializers.ContactGroupSerializer
+
+    url_detail = "contact-group-detail"
+    url_list = "contact-group-list"
+
+    def setUp(self):
+        super(ContactGroupApiTestCase, self).setUp()
+        self.group = GroupModelFactory()
+
+    def contact_group_data(self, contact=None, group=None):
+        """return contact geographic location data"""
+        contact = contact or self.contact
+        group = group or self.group
+
+        data = dict(contact=self.contact.id, group=group.id)
+
+        return data
+
+    def post_required_data(self, contact=None, group=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactGroupApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_group_data(contact, group))
+        return data
+
+    def verify_create_contact_group(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact group creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_group(self):
+        self.verify_create_contact_group()
+
+    def test_create_contact_group_partial(self):
+        data = self.contact_group_data()
+        self.verify_create_contact_group(data=data)
+
+    def test_get_contact_group(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_group_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_group(self):
+        self.verify_delete_default()
+
+
+class ContactImageApiTestCase(ContactAssociationApiTestCase):
+    """ContactImage API unit test class."""
+
+    def setUp(self):
+        super(ContactImageApiTestCase, self).setUp()
+        self.image_reference = ImageReferenceModelFactory()
+
+    def contact_image_data(self, contact=None, image_reference=None):
+        """return contact geographic location data"""
+        contact = contact or self.contact
+        image_reference = image_reference or self.image_reference
+
+        data = dict(contact=self.contact.id,
+                    image_reference=image_reference.id)
+
+        return data
+
+    def post_required_data(self, contact=None, image_reference=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactImageApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_image_data(contact, image_reference))
+        return data
+
+    def verify_create_contact_image_reference(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact image reference creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+
+class ContactLogoApiTestCase(ContactImageApiTestCase):
+    """ContactLogo API unit test class."""
+    factory_class = factories.ContactLogoModelFactory
+    model_class = models.ContactLogo
+    serializer_class = serializers.ContactLogoSerializer
+
+    url_detail = "contact-logo-detail"
+    url_list = "contact-logo-list"
+
+    def setUp(self):
+        super(ContactLogoApiTestCase, self).setUp()
+        self.logo_type = LogoTypeModelFactory()
+
+    def contact_logo_data(self, logo_type=None):
+        """return contact logo data"""
+        logo_type = logo_type or self.logo_type
+        data = dict(logo_type=self.logo_type.id)
+        return data
+
+    def post_required_data(self, contact=None, image_reference=None,
+                           logo_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactLogoApiTestCase, self).post_required_data(
+                user, site, contact, image_reference)
+        data.update(self.contact_logo_data(logo_type))
+        return data
+
+    def test_create_contact_logo(self):
+        self.verify_create_contact_image_reference()
+
+    def test_create_contact_logo_partial(self):
+        data = self.contact_image_data()
+        data.update(self.contact_logo_data())
+        self.verify_create_contact_image_reference(data=data)
+
+    def test_get_contact_logo(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_logo_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_logo(self):
+        self.verify_delete_default()
+
+
+class ContactPhotoApiTestCase(ContactImageApiTestCase):
+    """ContactPhoto API unit test class."""
+    factory_class = factories.ContactPhotoModelFactory
+    model_class = models.ContactPhoto
+    serializer_class = serializers.ContactPhotoSerializer
+
+    url_detail = "contact-photo-detail"
+    url_list = "contact-photo-list"
+
+    def setUp(self):
+        super(ContactPhotoApiTestCase, self).setUp()
+        self.photo_type = PhotoTypeModelFactory()
+
+    def contact_photo_data(self, photo_type=None):
+        """return contact photo data"""
+        photo_type = photo_type or self.photo_type
+        data = dict(photo_type=self.photo_type.id)
+        return data
+
+    def post_required_data(self, contact=None, image_reference=None,
+                           photo_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactPhotoApiTestCase, self).post_required_data(
+                user, site, contact, image_reference)
+        data.update(self.contact_photo_data(photo_type))
+        return data
+
+    def test_create_contact_photo(self):
+        self.verify_create_contact_image_reference()
+
+    def test_create_contact_photo_partial(self):
+        data = self.contact_image_data()
+        data.update(self.contact_photo_data())
+        self.verify_create_contact_image_reference(data=data)
+
+    def test_get_contact_photo(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_photo_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_photo(self):
+        self.verify_delete_default()
+
+
+class ContactInstantMessagingApiTestCase(ContactAssociationApiTestCase):
+    """ContactInstantMessaging API unit test class."""
+    factory_class = factories.ContactInstantMessagingModelFactory
+    model_class = models.ContactInstantMessaging
+    serializer_class = serializers.ContactInstantMessagingSerializer
+
+    url_detail = "contact-instant-messaging-detail"
+    url_list = "contact-instant-messaging-list"
+
+    def setUp(self):
+        super(ContactInstantMessagingApiTestCase, self).setUp()
+        self.instant_messaging = InstantMessagingModelFactory()
+        self.instant_messaging_type = InstantMessagingTypeModelFactory()
+
+    def contact_instant_messaging_data(self, contact=None,
+                                       instant_messaging=None,
+                                       instant_messaging_type=None):
+        """return contact instant_messaging data"""
+        contact = contact or self.contact
+        instant_messaging = instant_messaging or self.instant_messaging
+        instant_messaging_type = (instant_messaging_type or
+                                  self.instant_messaging_type)
+
+        data = dict(contact=self.contact.id,
+                    instant_messaging=instant_messaging.id,
+                    instant_messaging_type=instant_messaging_type.id)
+
+        return data
+
+    def post_required_data(self, contact=None, instant_messaging=None,
+                           instant_messaging_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactInstantMessagingApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_instant_messaging_data(
+            contact,
+            instant_messaging,
+            instant_messaging_type))
+        return data
+
+    def verify_create_contact_instant_messaging(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact group creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_instant_messaging(self):
+        self.verify_create_contact_instant_messaging()
+
+    def test_create_contact_instant_messaging_partial(self):
+        data = self.contact_instant_messaging_data()
+        self.verify_create_contact_instant_messaging(data=data)
+
+    def test_get_contact_instant_messaging(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_instant_messaging_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_instant_messaging(self):
         self.verify_delete_default()
