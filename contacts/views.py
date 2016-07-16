@@ -567,6 +567,10 @@ def contacts_urls(request, content_format):
             'contact-relationship-type-list',
             request=request,
             format=content_format),
+        'contact-urls': reverse(
+            'contact-url-list',
+            request=request,
+            format=content_format),
         'related-contacts': reverse(
             'related-contact-list',
             request=request,

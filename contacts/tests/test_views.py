@@ -17,7 +17,16 @@ from django_core_models.locations.tests.factories import (
     USAddressModelFactory,
     AddressTypeModelFactory,
     GeographicLocationModelFactory,
-    GeographicLocationTypeModelFactory)
+    GeographicLocationTypeModelFactory,
+    LanguageModelFactory,
+    LanguageTypeModelFactory,
+    TimezoneModelFactory,
+    TimezoneTypeModelFactory)
+from django_core_models.organizations.tests.factories import (
+    OrganizationModelFactory,
+    OrganizationUnitModelFactory,
+    RoleModelFactory,
+    TitleModelFactory)
 from django_core_models.social_media.tests.factories import (
     EmailModelFactory,
     EmailTypeModelFactory,
@@ -26,7 +35,14 @@ from django_core_models.social_media.tests.factories import (
     InstantMessagingModelFactory,
     InstantMessagingTypeModelFactory,
     LogoTypeModelFactory,
-    PhotoTypeModelFactory)
+    NameModelFactory,
+    NicknameModelFactory,
+    NicknameTypeModelFactory,
+    PhoneModelFactory,
+    PhoneTypeModelFactory,
+    PhotoTypeModelFactory,
+    UrlModelFactory,
+    UrlTypeModelFactory)
 
 
 from . import factories
@@ -848,7 +864,7 @@ class ContactInstantMessagingApiTestCase(ContactAssociationApiTestCase):
     def verify_create_contact_instant_messaging(
             self,
             data=None, extra_attrs=None):
-        """Generate post request for contact group creation."""
+        """Generate post request for contact instant messaging creation."""
         data = data or self.post_required_data()
 
         response, instance = self.verify_create(
@@ -877,4 +893,752 @@ class ContactInstantMessagingApiTestCase(ContactAssociationApiTestCase):
         self.verify_put(self.url_detail, instance, data, self.serializer_class)
 
     def test_delete_contact_instant_messaging(self):
+        self.verify_delete_default()
+
+
+class ContactLanguageApiTestCase(ContactAssociationApiTestCase):
+    """ContactLanguage API unit test class."""
+    factory_class = factories.ContactLanguageModelFactory
+    model_class = models.ContactLanguage
+    serializer_class = serializers.ContactLanguageSerializer
+
+    url_detail = "contact-language-detail"
+    url_list = "contact-language-list"
+
+    def setUp(self):
+        super(ContactLanguageApiTestCase, self).setUp()
+        self.language = LanguageModelFactory()
+        self.language_type = LanguageTypeModelFactory()
+
+    def contact_language_data(self, contact=None,
+                              language=None, language_type=None):
+        """return contact language data"""
+        contact = contact or self.contact
+        language = language or self.language
+        language_type = (language_type or self.language_type)
+
+        data = dict(contact=self.contact.id,
+                    language=language.id,
+                    language_type=language_type.id)
+
+        return data
+
+    def post_required_data(self, contact=None, language=None,
+                           language_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactLanguageApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_language_data(
+            contact,
+            language,
+            language_type))
+        return data
+
+    def verify_create_contact_language(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact language creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_language(self):
+        self.verify_create_contact_language()
+
+    def test_create_contact_language_partial(self):
+        data = self.contact_language_data()
+        self.verify_create_contact_language(data=data)
+
+    def test_get_contact_language(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_language_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_language(self):
+        self.verify_delete_default()
+
+
+class ContactNameApiTestCase(ContactAssociationApiTestCase):
+    """ContactName API unit test class."""
+    factory_class = factories.ContactNameModelFactory
+    model_class = models.ContactName
+    serializer_class = serializers.ContactNameSerializer
+
+    url_detail = "contact-name-detail"
+    url_list = "contact-name-list"
+
+    def setUp(self):
+        super(ContactNameApiTestCase, self).setUp()
+        self.name = NameModelFactory()
+
+    def contact_name_data(self, contact=None, name=None):
+        """return contact name data"""
+        contact = contact or self.contact
+        name = name or self.name
+
+        data = dict(contact=self.contact.id,
+                    name=name.id)
+
+        return data
+
+    def post_required_data(self, contact=None, name=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactNameApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_name_data(
+            contact,
+            name))
+        return data
+
+    def verify_create_contact_name(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact name creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_name(self):
+        self.verify_create_contact_name()
+
+    def test_create_contact_name_partial(self):
+        data = self.contact_name_data()
+        self.verify_create_contact_name(data=data)
+
+    def test_get_contact_name(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_name_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_name(self):
+        self.verify_delete_default()
+
+
+class ContactNicknameApiTestCase(ContactAssociationApiTestCase):
+    """ContactNickname API unit test class."""
+    factory_class = factories.ContactNicknameModelFactory
+    model_class = models.ContactNickname
+    serializer_class = serializers.ContactNicknameSerializer
+
+    url_detail = "contact-nickname-detail"
+    url_list = "contact-nickname-list"
+
+    def setUp(self):
+        super(ContactNicknameApiTestCase, self).setUp()
+        self.name = NicknameModelFactory()
+        self.nickname_type = NicknameTypeModelFactory()
+
+    def contact_nickname_data(self, contact=None,
+                              name=None, nickname_type=None):
+        """return contact nickname data"""
+        contact = contact or self.contact
+        name = name or self.name
+        nickname_type = nickname_type or self.nickname_type
+
+        data = dict(contact=self.contact.id,
+                    name=name.id,
+                    nickname_type=nickname_type.id)
+
+        return data
+
+    def post_required_data(self, contact=None, name=None,
+                           nickname_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactNicknameApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_nickname_data(
+            contact,
+            name,
+            nickname_type))
+        return data
+
+    def verify_create_contact_nickname(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact nickname creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_nickname(self):
+        self.verify_create_contact_nickname()
+
+    def test_create_contact_nickname_partial(self):
+        data = self.contact_nickname_data()
+        self.verify_create_contact_nickname(data=data)
+
+    def test_get_contact_nickname(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_nickname_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_nickname(self):
+        self.verify_delete_default()
+
+
+class ContactOrganizationApiTestCase(ContactAssociationApiTestCase):
+    """ContactOrganization API unit test class."""
+    factory_class = factories.ContactOrganizationModelFactory
+    model_class = models.ContactOrganization
+    serializer_class = serializers.ContactOrganizationSerializer
+
+    url_detail = "contact-organization-detail"
+    url_list = "contact-organization-list"
+
+    def setUp(self):
+        super(ContactOrganizationApiTestCase, self).setUp()
+        self.organization = OrganizationModelFactory()
+        self.unit = OrganizationUnitModelFactory()
+
+    def contact_organization_data(self, contact=None,
+                                  organization=None,
+                                  unit=None):
+        """return contact organization data"""
+        contact = contact or self.contact
+        organization = organization or self.organization
+        unit = unit or self.unit
+
+        data = dict(contact=self.contact.id,
+                    organization=organization.id,
+                    unit=unit.id)
+
+        return data
+
+    def post_required_data(self, contact=None, organization=None,
+                           unit=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactOrganizationApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_organization_data(
+            contact,
+            organization,
+            unit))
+        return data
+
+    def verify_create_contact_organization(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact organization creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_organization(self):
+        self.verify_create_contact_organization()
+
+    def test_create_contact_organization_partial(self):
+        data = self.contact_organization_data()
+        self.verify_create_contact_organization(data=data)
+
+    def test_get_contact_organization(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_organization_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_organization(self):
+        self.verify_delete_default()
+
+
+class ContactPhoneApiTestCase(ContactAssociationApiTestCase):
+    """ContactPhone API unit test class."""
+    factory_class = factories.ContactPhoneModelFactory
+    model_class = models.ContactPhone
+    serializer_class = serializers.ContactPhoneSerializer
+
+    url_detail = "contact-phone-detail"
+    url_list = "contact-phone-list"
+
+    def setUp(self):
+        super(ContactPhoneApiTestCase, self).setUp()
+        self.phone = PhoneModelFactory()
+        self.phone_type = PhoneTypeModelFactory()
+
+    def contact_phone_data(self, contact=None,
+                           phone=None, phone_type=None):
+        """return contact organization data"""
+        contact = contact or self.contact
+        phone = phone or self.phone
+        phone_type = phone_type or self.phone_type
+
+        data = dict(contact=self.contact.id,
+                    phone=phone.id,
+                    phone_type=phone_type.id)
+
+        return data
+
+    def post_required_data(self, contact=None, phone=None,
+                           phone_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactPhoneApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_phone_data(
+            contact,
+            phone,
+            phone_type))
+        return data
+
+    def verify_create_contact_phone(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact phone creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_phone(self):
+        self.verify_create_contact_phone()
+
+    def test_create_contact_phone_partial(self):
+        data = self.contact_phone_data()
+        self.verify_create_contact_phone(data=data)
+
+    def test_get_contact_phone(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_phone_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_phone(self):
+        self.verify_delete_default()
+
+
+class ContactRoleApiTestCase(ContactAssociationApiTestCase):
+    """ContactRole API unit test class."""
+    factory_class = factories.ContactRoleModelFactory
+    model_class = models.ContactRole
+    serializer_class = serializers.ContactRoleSerializer
+
+    url_detail = "contact-role-detail"
+    url_list = "contact-role-list"
+
+    def setUp(self):
+        super(ContactRoleApiTestCase, self).setUp()
+        self.role = RoleModelFactory()
+        self.organization = OrganizationModelFactory()
+
+    def contact_role_data(self, contact=None,
+                          role=None, organization=None):
+        """return contact role data"""
+        contact = contact or self.contact
+        role = role or self.role
+        organization = organization or self.organization
+
+        data = dict(contact=self.contact.id,
+                    role=role.id,
+                    organization=organization.id)
+
+        return data
+
+    def post_required_data(self, contact=None, role=None,
+                           organization=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactRoleApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_role_data(
+            contact,
+            role,
+            organization))
+        return data
+
+    def verify_create_contact_role(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact role creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_role(self):
+        self.verify_create_contact_role()
+
+    def test_create_contact_role_partial(self):
+        data = self.contact_role_data()
+        self.verify_create_contact_role(data=data)
+
+    def test_get_contact_role(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_role_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_role(self):
+        self.verify_delete_default()
+
+
+class ContactTimezoneApiTestCase(ContactAssociationApiTestCase):
+    """ContactTimezone API unit test class."""
+    factory_class = factories.ContactTimezoneModelFactory
+    model_class = models.ContactTimezone
+    serializer_class = serializers.ContactTimezoneSerializer
+
+    url_detail = "contact-timezone-detail"
+    url_list = "contact-timezone-list"
+
+    def setUp(self):
+        super(ContactTimezoneApiTestCase, self).setUp()
+        self.timezone = TimezoneModelFactory()
+        self.timezone_type = TimezoneTypeModelFactory()
+
+    def contact_timezone_data(self, contact=None,
+                              timezone=None, timezone_type=None):
+        """return contact timezone data"""
+        contact = contact or self.contact
+        timezone = timezone or self.timezone
+        timezone_type = timezone_type or self.timezone_type
+
+        data = dict(contact=self.contact.id,
+                    timezone=timezone.id,
+                    timezone_type=timezone_type.id)
+
+        return data
+
+    def post_required_data(self, contact=None, timezone=None,
+                           timezone_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactTimezoneApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_timezone_data(
+            contact,
+            timezone,
+            timezone_type))
+        return data
+
+    def verify_create_contact_timezone(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact timezone creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_timezone(self):
+        self.verify_create_contact_timezone()
+
+    def test_create_contact_timezone_partial(self):
+        data = self.contact_timezone_data()
+        self.verify_create_contact_timezone(data=data)
+
+    def test_get_contact_timezone(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_timezone_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_timezone(self):
+        self.verify_delete_default()
+
+
+class ContactTitleApiTestCase(ContactAssociationApiTestCase):
+    """ContactTitle API unit test class."""
+    factory_class = factories.ContactTitleModelFactory
+    model_class = models.ContactTitle
+    serializer_class = serializers.ContactTitleSerializer
+
+    url_detail = "contact-title-detail"
+    url_list = "contact-title-list"
+
+    def setUp(self):
+        super(ContactTitleApiTestCase, self).setUp()
+        self.title = TitleModelFactory()
+        self.organization = OrganizationModelFactory()
+
+    def contact_title_data(self, contact=None,
+                           title=None, organization=None):
+        """return contact title data"""
+        contact = contact or self.contact
+        title = title or self.title
+        organization = organization or self.organization
+
+        data = dict(contact=self.contact.id,
+                    title=title.id,
+                    organization=organization.id)
+
+        return data
+
+    def post_required_data(self, contact=None, title=None,
+                           title_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactTitleApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_title_data(
+            contact,
+            title,
+            title_type))
+        return data
+
+    def verify_create_contact_title(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact title creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_title(self):
+        self.verify_create_contact_title()
+
+    def test_create_contact_title_partial(self):
+        data = self.contact_title_data()
+        self.verify_create_contact_title(data=data)
+
+    def test_get_contact_title(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_title_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_title(self):
+        self.verify_delete_default()
+
+
+class ContactUrlApiTestCase(ContactAssociationApiTestCase):
+    """ContactUrl API unit test class."""
+    factory_class = factories.ContactUrlModelFactory
+    model_class = models.ContactUrl
+    serializer_class = serializers.ContactUrlSerializer
+
+    url_detail = "contact-url-detail"
+    url_list = "contact-url-list"
+
+    def setUp(self):
+        super(ContactUrlApiTestCase, self).setUp()
+        self.url = UrlModelFactory()
+        self.url_type = UrlTypeModelFactory()
+
+    def contact_url_data(self, contact=None,
+                         url=None, url_type=None):
+        """return contact url data"""
+        contact = contact or self.contact
+        url = url or self.url
+        url_type = url_type or self.url_type
+
+        data = dict(contact=self.contact.id,
+                    url=url.id,
+                    url_type=url_type.id)
+
+        return data
+
+    def post_required_data(self, contact=None, url=None,
+                           url_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            ContactUrlApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.contact_url_data(
+            contact,
+            url,
+            url_type))
+        return data
+
+    def verify_create_contact_url(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact url creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_contact_url(self):
+        self.verify_create_contact_url()
+
+    def test_create_contact_url_partial(self):
+        data = self.contact_url_data()
+        self.verify_create_contact_url(data=data)
+
+    def test_get_contact_url(self):
+        self.verify_get_defaults()
+
+    def test_put_contact_url_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_contact_url(self):
+        self.verify_delete_default()
+
+
+class RelatedContactApiTestCase(ContactAssociationApiTestCase):
+    """RelatedContact API unit test class."""
+    factory_class = factories.RelatedContactModelFactory
+    model_class = models.RelatedContact
+    serializer_class = serializers.RelatedContactSerializer
+
+    url_detail = "related-contact-detail"
+    url_list = "related-contact-list"
+
+    def setUp(self):
+        super(RelatedContactApiTestCase, self).setUp()
+        self.to_contact = factories.ContactModelFactory()
+        self.contact_relationship_type = (
+            factories.ContactRelationshipTypeModelFactory())
+
+    def related_contact_data(self, from_contact=None,
+                             to_contact=None,
+                             contact_relationship_type=None):
+        """return related contact data"""
+        from_contact = from_contact or self.contact
+        to_contact = to_contact or self.to_contact
+        contact_relationship_type = (contact_relationship_type or
+                                     self.contact_relationship_type)
+
+        data = dict(from_contact=from_contact.id,
+                    to_contact=to_contact.id,
+                    contact_relationship_type=contact_relationship_type.id)
+
+        return data
+
+    def post_required_data(self, contact=None, to_contact=None,
+                           contact_relationship_type=None,
+                           user=None, site=None):
+        """Return model post request required data."""
+        data = super(
+            RelatedContactApiTestCase, self).post_required_data(
+                user, site)
+        data.update(self.related_contact_data(
+            contact,
+            to_contact,
+            contact_relationship_type))
+        return data
+
+    def verify_create_related_contact(
+            self,
+            data=None, extra_attrs=None):
+        """Generate post request for contact url creation."""
+        data = data or self.post_required_data()
+
+        response, instance = self.verify_create(
+            url_name=self.url_list,
+            data=data,
+            model_class=self.model_class)
+
+        self.verify_contact_association(instance, data)
+        return response, instance
+
+    def test_create_related_contact(self):
+        self.verify_create_related_contact()
+
+    def test_create_related_contact_partial(self):
+        data = self.related_contact_data()
+        self.verify_create_related_contact(data=data)
+
+    def test_get_related_contact(self):
+        self.verify_get_defaults()
+
+    def test_put_related_contact_partial(self):
+        instance = self.create_instance_default()
+
+        # @TODO: need to limit what can be updated
+        data = dict(id=instance.id, priority=5)
+        self.verify_put(self.url_detail, instance, data, self.serializer_class)
+
+    def test_delete_related_contact(self):
         self.verify_delete_default()

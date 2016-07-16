@@ -256,11 +256,11 @@ class ContactUrlSerializer(ContactAssociationSerializer):
             "url", "url_type")
 
 
-class RelatedContactSerializer(ContactAssociationSerializer):
+class RelatedContactSerializer(PrioritizedModelSerializer):
     """ContactUrl model serializer class."""
 
-    class Meta(ContactAssociationSerializer.Meta):
+    class Meta(PrioritizedModelSerializer.Meta):
         """Meta class definition."""
         model = models.RelatedContact
-        fields = ContactAssociationSerializer.Meta.fields + (
+        fields = PrioritizedModelSerializer.Meta.fields + (
             "from_contact", "to_contact", "contact_relationship_type")
