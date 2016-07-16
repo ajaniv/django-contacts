@@ -167,9 +167,9 @@ urlpatterns = [
 
     url(r'^related-contacts/$',
         views.RelatedContactList.as_view(),
-        name='contact-url-list'),
+        name='related-contact-list'),
     url(r'^related-contacts/(?P<pk>[0-9]+)/$',
         views.RelatedContactDetail.as_view(),
-        name='contact-url-detail'),
+        name='related-contact-detail'),
 
 ]
