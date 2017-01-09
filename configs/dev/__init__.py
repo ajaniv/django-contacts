@@ -18,3 +18,8 @@ from configs.common.rest_framework import *  # @UnusedWildImport
 ENV_TOX_CONTEXT = 'TOX_CONTEXT'
 if not os.getenv(ENV_TOX_CONTEXT, False):
     INSTALLED_APPS += ["django_extensions"]
+
+# @TODO: revisit approach to allowed hosts; would require changes for different
+#     docker machine configurations
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.99.100']

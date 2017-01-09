@@ -1,0 +1,4 @@
+-r ../core.txt
+-r ../db/postgres.txt
+-r ../django/dev_tools.txt
+-r ../django/testing.txt

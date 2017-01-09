@@ -4,6 +4,6 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 WORKDIR /code
 ADD requirements /code/requirements
-RUN pip install -r requirements/docker/dev_mysql.txt
+RUN pip install -r requirements/docker/mysql.txt
 ADD . /code/
 
