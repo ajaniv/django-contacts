@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 from configs.common.root import (CURRENT_ENV, DEV_ENV,
-                                 LOCAL_ENV, STAGING_ENV, PROD_ENV)
+                                 LOCAL_ENV, STAGING_ENV, PROD_ENV)  # @UnusedImport
 
 
 if CURRENT_ENV in (DEV_ENV, LOCAL_ENV):

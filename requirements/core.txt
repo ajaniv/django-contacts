@@ -1,0 +1,6 @@
+# development environment requirements file
+-r common/project.txt
+-r django/core.txt
+-r django/extras.txt
+-r django/rest_framework.txt
+-r common/git_projects.txt

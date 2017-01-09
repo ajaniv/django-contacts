@@ -1,6 +1,6 @@
 #Docker mysql environment file
 DB_ENGINE=mysql
-MYSQL_NAME=django_core_utils
+MYSQL_NAME=django_core_models
 MYSQL_USER=mysql
 MYSQL_PASSWORD=mysql
 MYSQL_HOST=db-mysql

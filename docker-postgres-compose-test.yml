@@ -1,22 +1,22 @@
 # docker-compose posgtres configuration file
 version: '2'
 services:
-  db-postgres:
+  db-postgres-test:
     restart: always
     image: postgres:latest
     ports:
     - "5433:5432"
-  web-postgres:
+  web-postgres-test:
     build: 
       context: .
       dockerfile: docker-postgres-dockerfile-test.yml
-    command: docker/run_tests.sh -w 3 -t postgres -d db-postgres
+    command: docker/run_tests.sh -w 3 -t postgres -d db-postgres-test
     volumes:
       - .:/code
     ports:
       - "8000:8000"
     depends_on:
-      - db-postgres
+      - db-postgres-test
     env_file: 
       - docker/env/common
       - docker/env/testing/postgres

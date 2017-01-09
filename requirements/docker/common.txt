@@ -1,3 +1,0 @@
-# Docker common requirements file
-Django==1.9.4
--r ../common.txt

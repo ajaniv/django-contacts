@@ -14,8 +14,8 @@ env:
     - COMPOSE_VERSION=1.6.2
 
   matrix:
-    - TOX_ENV=py35-django18
     - TOX_ENV=py35-django19
+    - TOX_ENV=py35-django110
     - COMPOSE_FILE='docker-sqlite-compose-test.yml'
     - COMPOSE_FILE='docker-mysql-compose-test.yml'
     - COMPOSE_FILE='docker-postgres-compose-test.yml'
@@ -26,7 +26,7 @@ matrix:
     - python: '2.7'
       env: TOX_ENV=py27-django19
     - python: '2.7'
-      env: TOX_ENV=py27-django18
+      env: TOX_ENV=py27-django110
 
 
 before_install:
