@@ -1,0 +1,3 @@
+-r ../core.txt
+-r ../django/dev_tools.txt
+-r ../django/testing.txt

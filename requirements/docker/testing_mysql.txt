@@ -1,3 +1,0 @@
-# Docker mysql testing requirements file
--r testing.txt
--r ../mysql.txt
