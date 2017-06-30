@@ -6,13 +6,14 @@ Django location application admin  module.
 
 """
 from __future__ import absolute_import
+import django
 from django.forms.models import BaseInlineFormSet
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import render_to_response, get_object_or_404, redirect, render
 
-from guardian.admin import GuardedModelAdminMixin, GroupManage, UserManage
+from guardian.admin import GuardedModelAdminMixin
 from guardian.shortcuts import get_objects_for_user
 from guardian.compat import OrderedDict, get_user_model, get_model_name
 from guardian.shortcuts import get_users_with_perms
@@ -482,8 +483,8 @@ class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
         )
 
         if request.method == 'POST' and 'submit_manage_user' in request.POST:
-            user_form = UserManage(request.POST)
-            group_form = GroupManage()
+            user_form = self.get_obj_perms_user_select_form(request)(request.POST)
+            group_form = self.get_obj_perms_group_select_form(request)(request.POST)
             info = (
                 self.admin_site.name,
                 self.model._meta.app_label,
@@ -496,10 +497,9 @@ class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
                     args=[obj.pk, user_id]
                 )
                 return redirect(url)
-        elif (request.method == 'POST' and
-              'submit_manage_group' in request.POST):
-            user_form = UserManage()
-            group_form = GroupManage(request.POST)
+        elif request.method == 'POST' and 'submit_manage_group' in request.POST:
+            user_form = self.get_obj_perms_user_select_form(request)(request.POST)
+            group_form = self.get_obj_perms_group_select_form(request)(request.POST)
             info = (
                 self.admin_site.name,
                 self.model._meta.app_label,
@@ -513,8 +513,8 @@ class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
                 )
                 return redirect(url)
         else:
-            user_form = UserManage()
-            group_form = GroupManage()
+            user_form = self.get_obj_perms_user_select_form(request)()
+            group_form = self.get_obj_perms_group_select_form(request)()
 
         context = self.get_obj_perms_base_context(request, obj)
         context['users_perms'] = users_perms
@@ -525,10 +525,10 @@ class ContactAdmin(GuardedModelAdminMixin, PrioritizedModelAdmin):
         # https://github.com/django/django/commit/cf1f36bb6eb34fafe6c224003ad585a647f6117b
         request.current_app = self.admin_site.name
 
-        return render_to_response(
-            self.get_obj_perms_manage_template(),
-            context,
-            RequestContext(request))
+        if django.VERSION >= (1, 10):
+            return render(request, self.get_obj_perms_manage_template(), context)
+
+        return render_to_response(self.get_obj_perms_manage_template(), context, RequestContext(request))
 
     def contact(self, request):
         """Return associated contact instance."""
