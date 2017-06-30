@@ -1,2 +1,2 @@
 # django_core_models project specific requirements
-pycountry==1.20
+pycountry==17.5.14
