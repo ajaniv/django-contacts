@@ -1,9 +1,10 @@
 # docker-compose mysql configuration file
-version: '2'
+version: "3"
 services:
   db-mysql-test:
     restart: always
     image: mysql:latest
+    entrypoint: ['/entrypoint.sh', '--default-authentication-plugin=mysql_native_password']
     ports:
       - "3307:3306"
     environment:
@@ -14,11 +15,11 @@ services:
     - MYSQL_PASSWORD=test_user
     - MYSQL_DATABASE=django_core_models
     
-  web-mysql-test:
+  web-test:
     build: 
       context: .
       dockerfile: docker-mysql-dockerfile-test.yml
-    command: docker/run_tests.sh -w 10 -t mysql -d db-mysql-test
+    command: docker/run_tests.sh -w 15 -t mysql -d db-mysql-test
     volumes:
       - .:/code
     ports:

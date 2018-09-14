@@ -6,16 +6,17 @@ Django location application admin  module.
 
 """
 from __future__ import absolute_import
+from collections import OrderedDict
 import django
 from django.forms.models import BaseInlineFormSet
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect, render
+from django.contrib.auth import get_user_model
 
 from guardian.admin import GuardedModelAdminMixin
 from guardian.shortcuts import get_objects_for_user
-from guardian.compat import OrderedDict, get_user_model, get_model_name
 from guardian.shortcuts import get_users_with_perms
 from guardian.shortcuts import get_groups_with_perms
 
@@ -27,6 +28,13 @@ from python_core_utils.core import class_name
 
 from . import forms
 from . import models
+
+
+def get_model_name(obj):
+    """
+    Returns the name of the model
+    """
+    return obj._meta.model_name
 
 
 class OrderedFormSet(BaseInlineFormSet):
