@@ -10,7 +10,7 @@ from collections import OrderedDict
 import django
 from django.forms.models import BaseInlineFormSet
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect, render
 from django.contrib.auth import get_user_model
