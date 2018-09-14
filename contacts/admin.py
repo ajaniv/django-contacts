@@ -29,11 +29,13 @@ from python_core_utils.core import class_name
 from . import forms
 from . import models
 
+
 def get_model_name(obj):
     """
     Returns the name of the model
     """
     return obj._meta.model_name
+
 
 class OrderedFormSet(BaseInlineFormSet):
     """Class to order inline objects."""
