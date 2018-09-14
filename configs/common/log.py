@@ -71,7 +71,7 @@ LOGGING = {
     'loggers': {
         'django.db': {
             'handlers': ['console', 'log_file'],
-            'level': LOG_LEVEL_DEBUG,
+            'level': LOG_LEVEL_INFO,
             'propagate': True
         },
         'django.request': {
