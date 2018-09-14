@@ -1,5 +1,5 @@
 # docker-compose posgtres configuration file
-version: '2'
+version: "3"
 services:
   db-postgres:
     restart: always

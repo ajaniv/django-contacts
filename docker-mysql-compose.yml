@@ -1,9 +1,10 @@
 # docker-compose mysql configuration file
-version: '2'
+version: "3"
 services:
   db-mysql:
     restart: always
     image: mysql:latest
+    entrypoint: ['/entrypoint.sh', '--default-authentication-plugin=mysql_native_password']
     volumes:
     - ./databases/mysql_data:/var/lib/mysql
     - ./docker/mysql_run.sh:/docker/mysql_run.sh
@@ -22,7 +23,7 @@ services:
     build: 
       context: .
       dockerfile: docker-mysql-dockerfile.yml
-    command: docker/run.sh -w 10 -t mysql -d db-mysql
+    command: docker/run.sh -w 15 -t mysql -d db-mysql
     volumes:
       - .:/code
     ports:
