@@ -19,7 +19,7 @@ REST_FRAMEWORK = {
         'rest_framework.versioning.AcceptHeaderVersioning',
     'DEFAULT_VERSION': API_DEFAULT_VERSION,
     'ALLOWED_VERSIONS': (API_ALLOWED_VERSIONS,),
-    # @TODO: review page size settings
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
     # @TODO: review throttling settings
     'DEFAULT_THROTTLE_CLASSES': (
