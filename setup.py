@@ -18,7 +18,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 _git_url_root = 'git+ssh://git@github.com/ajaniv/'
 setup(
     name='django-contacts',
-    version='0.5.0',
+    version='0.5.1',
     include_package_data=True,
     license='BSD License',  # example license
     description='Django contacts application',
@@ -48,8 +48,8 @@ setup(
     ],
     dependency_links=[
         _git_url_root + 'python-core-utils@v0.5.0#egg=python-core-utils',
-        _git_url_root + 'django-core-utils@v0.5.0#egg=django-core-utils',
-        _git_url_root + 'django-core-models@v0.5.0#egg=django-core-models'
+        _git_url_root + 'django-core-utils@v0.5.1#egg=django-core-utils',
+        _git_url_root + 'django-core-models@v0.5.1#egg=django-core-models'
     ],
     extras_require={
         'dev': ['check-manifest'],
